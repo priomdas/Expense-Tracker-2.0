@@ -642,8 +642,10 @@ async function saveEdit() {
 }
 
 // ─── TOGGLE DETAILS ───
-window.toggleTxDetails = function(id) {
-  const item = document.querySelector(`.tx-item[data-tx-id="${CSS.escape(id)}"]`);
+window.toggleTxDetails = function(item) {
+  if (typeof item === 'string') {
+    item = document.querySelector(`.tx-item[data-tx-id="${CSS.escape(item)}"]`);
+  }
   if (!item) return;
   const willOpen = !item.classList.contains('expanded');
   // close any other open ones for cleaner UX
@@ -669,7 +671,7 @@ function txHTML(t, showActs = true) {
     const noteText = t.note ? escapeHTML(t.note) : '';
     const acts = showActs ? `<button class="tx-detail-btn danger" onclick="deleteTx('${t.id}'); event.stopPropagation();"><span class="mi sm">delete</span> Delete</button>` : '';
 
-    return `<div class="tx-item compact" data-tx-id="${t.id}" onclick="toggleTxDetails('${t.id}')">
+    return `<div class="tx-item compact" data-tx-id="${t.id}" onclick="toggleTxDetails(this)">
       <div class="tx-row">
         <div class="tx-icon" style="background:rgba(56, 189, 248, 0.15);color:#38bdf8"><span class="mi sm">sync_alt</span></div>
         <div class="tx-info">
@@ -717,7 +719,7 @@ function txHTML(t, showActs = true) {
     <button class="tx-detail-btn" onclick="openEdit('${t.id}'); event.stopPropagation();"><span class="mi sm">edit</span> Edit</button>
     <button class="tx-detail-btn danger" onclick="deleteTx('${t.id}'); event.stopPropagation();"><span class="mi sm">delete</span> Delete</button>` : '';
 
-  return `<div class="tx-item compact" data-tx-id="${t.id}" onclick="toggleTxDetails('${t.id}')">
+  return `<div class="tx-item compact" data-tx-id="${t.id}" onclick="toggleTxDetails(this)">
     <div class="tx-row">
       <div class="tx-icon ${t.type === 'income' ? 'inc' : 'exp'}">${icon}</div>
       <div class="tx-info">
