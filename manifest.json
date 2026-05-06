@@ -1,0 +1,17 @@
+{
+  "name": "Ledger - Family Finance",
+  "short_name": "Ledger",
+  "start_url": "index.html",
+  "display": "standalone",
+  "background_color": "#0a0a0a",
+  "theme_color": "#5e5ce6",
+  "description": "Family Finance Expense Tracker",
+  "icons": [
+    {
+      "src": "logo.png",
+      "sizes": "192x192 512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

@@ -1,0 +1,1255 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Ledger">
+  <meta name="theme-color" content="#5e5ce6">
+  <title>Ledger</title>
+
+  <!-- PWA Setup -->
+  <link rel="manifest" href="manifest.json?v=2">
+  <link rel="icon" type="image/png" href="logo.png">
+  <link rel="apple-touch-icon" href="logo.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,300,0,0&display=swap"
+    rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.9.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.9.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.9.0/firebase-messaging-compat.js"></script>
+  <link rel="stylesheet" href="style.css?v=16">
+</head>
+
+<body>
+
+  <div id="appShell" style="display:none">
+    <aside id="desktopRail" aria-label="Primary navigation">
+      <div class="rail-brand">
+        <div class="rail-logo">L</div>
+        <div class="rail-brand-copy">
+          <div class="rail-brand-title">Ledger</div>
+          <div class="rail-brand-sub">Finance workspace</div>
+        </div>
+      </div>
+      <div class="rail-user-card">
+        <div class="rail-user-label">Account</div>
+        <div class="rail-user-name" id="railUserName">User</div>
+        <div class="rail-user-sub" id="railUserSub">Track spending, wallets, goals, and budgets in one place.</div>
+      </div>
+      <div class="rail-nav">
+        <button class="nav-item active desktop-nav-item" id="rail-home" onclick="navTo('home')">
+          <div class="nav-icon"><span class="mi">home</span></div>
+          <span class="nav-label">Home</span>
+        </button>
+        <button class="nav-item desktop-nav-item" id="rail-stats" onclick="navTo('stats')">
+          <div class="nav-icon"><span class="mi">insert_chart</span></div>
+          <span class="nav-label">Analytics</span>
+        </button>
+        <button class="nav-item desktop-nav-item" id="rail-wallets" onclick="navTo('wallets')">
+          <div class="nav-icon"><span class="mi">account_balance_wallet</span></div>
+          <span class="nav-label">Wallets</span>
+        </button>
+
+        <button class="nav-item desktop-nav-item" id="rail-debts" onclick="navTo('debts')">
+          <div class="nav-icon"><span class="mi">handshake</span></div>
+          <span class="nav-label">Debts</span>
+        </button>
+        <button class="nav-item desktop-nav-item" id="rail-settings" onclick="navigate('p-settings')">
+          <div class="nav-icon"><span class="mi">settings</span></div>
+          <span class="nav-label">Settings</span>
+        </button>
+      </div>
+      <button class="rail-add" onclick="openAddSheet('expense')">
+        <span class="rail-add-icon">＋</span>
+        <span>New Transaction</span>
+      </button>
+    </aside>
+    <!-- PAGES -->
+    <div id="pages">
+
+      <!-- HOME PAGE -->
+      <div class="page active" id="p-home">
+        <div class="page-header" style="padding-top:max(16px,env(safe-area-inset-top))">
+          <div>
+            <div id="homeGreeting"
+              style="font-size:0.78rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:1px">
+              Hello!</div>
+            <div class="page-title" id="homeName">User</div>
+          </div>
+          <button class="header-action" id="menuBtn" onclick="navigate('p-settings')" title="Settings"><span
+              class="mi">settings</span></button>
+        </div>
+        <div class="scroll-area" id="homeScroll">
+          <!-- Hero balance card -->
+          <div class="home-hero">
+            <div class="hero-scenery" aria-hidden="true">
+              <div class="hero-sky-haze"></div>
+              <div class="hero-celestial"></div>
+              <div class="hero-cloud c4"></div>
+              <div class="hero-cloud c5"></div>
+              <div class="hero-cloud c6"></div>
+              <div class="hero-hills"></div>
+              <div class="hero-towers"></div>
+              <div class="hero-city"></div>
+              <div class="hero-ground"></div>
+            </div>
+            <div class="hero-label">Total Balance</div>
+            <div class="hero-amount" id="heroBalance">৳0.00</div>
+            <div class="hero-row">
+              <div class="hero-stat">
+                <div class="hero-stat-label">Income</div>
+                <div class="hero-stat-val inc" id="heroIncome">৳0.00</div>
+              </div>
+              <div class="hero-stat">
+                <div class="hero-stat-label">Expenses</div>
+                <div class="hero-stat-val exp" id="heroExpense">৳0.00</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Insight card -->
+          <div class="insight-card" id="insightCard" style="display:none">
+            <div class="insight-icon">💡</div>
+            <div class="insight-text" id="insightText">Loading insights…</div>
+          </div>
+
+          <!-- Quick actions -->
+          <div class="quick-actions">
+            <button class="qa-btn" onclick="openAddSheet('income')">
+              <div class="qa-icon" style="background:var(--green-light);--qa-icon-color:var(--green)"><span
+                  class="mi">trending_up</span></div>
+              <span class="qa-label">Income</span>
+            </button>
+            <button class="qa-btn" onclick="openAddSheet('expense')">
+              <div class="qa-icon" style="background:var(--red-light);--qa-icon-color:var(--red)"><span
+                  class="mi">trending_down</span></div>
+              <span class="qa-label">Expense</span>
+            </button>
+            <button class="qa-btn" onclick="navigate('p-wallets')">
+              <div class="qa-icon" style="background:var(--purple-light);--qa-icon-color:var(--purple)"><span
+                  class="mi">account_balance_wallet</span></div>
+              <span class="qa-label">Wallets</span>
+            </button>
+            <button class="qa-btn" onclick="navigate('p-goals')">
+              <div class="qa-icon" style="background:var(--yellow-light);--qa-icon-color:#d3a900"><span
+                  class="mi">track_changes</span></div>
+              <span class="qa-label">Goals</span>
+            </button>
+            <button class="qa-btn" onclick="navigate('p-debts')">
+              <div class="qa-icon" style="background:var(--purple-light);--qa-icon-color:#8a2be2"><span
+                  class="mi">handshake</span></div>
+              <span class="qa-label">Debts</span>
+            </button>
+          </div>
+
+          <!-- Recent transactions -->
+          <div class="section-header">
+            <div class="section-title">Recent Transactions</div>
+            <button class="section-link" onclick="navigate('p-transactions')">See all →</button>
+          </div>
+          <div id="recentTxList">
+            <div class="empty">
+              <div class="empty-icon">📋</div>
+              <div class="empty-text">No transactions yet.<br>Tap + to add one!</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TRANSACTIONS PAGE -->
+      <div class="page" id="p-transactions">
+        <div class="page-header" style="padding-top:max(16px,env(safe-area-inset-top))">
+          <button class="back-btn" onclick="goBack()">←</button>
+          <div class="page-title">Transactions</div>
+          <div style="width:36px"></div>
+        </div>
+        <div style="padding:0 20px 12px;flex-shrink:0;display:flex;gap:8px;flex-wrap:wrap">
+          <input class="form-input" id="filterSearch" type="text" placeholder="Search..." oninput="renderFullTx()"
+            style="flex:1;padding:10px 12px;min-width:140px">
+          <select class="form-input" id="filterDate" onchange="renderFullTx()"
+            style="flex:1;padding:10px 12px;min-width:120px">
+            <option value="all">All Time</option>
+            <option value="thisMonth">This Month</option>
+            <option value="lastMonth">Last Month</option>
+          </select>
+          <select class="form-input" id="filterType" onchange="renderFullTx()"
+            style="flex:1;padding:10px 12px;min-width:100px">
+            <option value="">All Types</option>
+            <option value="income">Income</option>
+            <option value="expense">Expense</option>
+          </select>
+          <select class="form-input" id="filterCat" onchange="renderFullTx()"
+            style="flex:1;padding:10px 12px;min-width:120px">
+            <option value="">All Categories</option>
+          </select>
+        </div>
+        <div class="scroll-area" id="fullTxList"></div>
+      </div>
+
+      <!-- STATS PAGE -->
+      <div class="page" id="p-stats">
+        <div class="page-header" style="padding-top:max(16px,env(safe-area-inset-top))">
+          <button class="back-btn" onclick="goBack()">←</button>
+          <div class="page-title">Analytics</div>
+          <button class="header-action" onclick="exportCSV()" title="Export CSV" style="font-size:1rem">📥</button>
+        </div>
+        <div class="scroll-area">
+          <div style="padding: 0 16px 12px 16px; margin-top: 4px;">
+            <select id="analyticsMonthFilter" class="form-input" onchange="rebuildCharts()"
+              style="font-weight:600; padding: 10px 14px; border-radius: var(--radius-sm);">
+            </select>
+          </div>
+          <div class="stat-grid">
+            <button type="button" class="stat-box" onclick="openTransactionsFromStat('all')"
+              aria-label="Show all balance transactions">
+              <div class="stat-box-label"><span class="stat-dot" style="background:var(--purple)"></span>Balance</div>
+              <div class="stat-box-val" id="sb-balance" style="color:var(--purple)">৳0</div>
+              <div class="stat-box-sub">Net amount</div>
+            </button>
+            <button type="button" class="stat-box" onclick="openTransactionsFromStat('income')"
+              aria-label="Show income transactions">
+              <div class="stat-box-label"><span class="stat-dot" style="background:var(--green)"></span>Income</div>
+              <div class="stat-box-val" id="sb-income" style="color:var(--green)">৳0</div>
+              <div class="stat-box-sub" id="sb-icount">0 txns</div>
+            </button>
+            <button type="button" class="stat-box" onclick="openTransactionsFromStat('expense')"
+              aria-label="Show expense transactions">
+              <div class="stat-box-label"><span class="stat-dot" style="background:var(--red)"></span>Expenses</div>
+              <div class="stat-box-val" id="sb-expense" style="color:var(--red)">৳0</div>
+              <div class="stat-box-sub" id="sb-ecount">0 txns</div>
+            </button>
+            <button type="button" class="stat-box" onclick="openTransactionsFromStat('all')"
+              aria-label="Show transactions used for savings">
+              <div class="stat-box-label"><span class="stat-dot" style="background:var(--yellow)"></span>Savings</div>
+              <div class="stat-box-val" id="sb-savings" style="color:var(--yellow)">0%</div>
+              <div class="stat-box-sub">of income saved</div>
+            </button>
+          </div>
+
+          <div class="chart-card">
+            <div class="chart-card-title" style="display:flex; justify-content:space-between; align-items:center;">
+              <div>Cash Flow <span class="chart-card-sub">6 months</span></div>
+              <div id="monthlyComparison"
+                style="font-size:0.75rem;font-weight:700;padding:2px 8px;border-radius:12px;background:var(--surface2);">
+              </div>
+            </div>
+            <div class="chart-wrap"><canvas id="barChart"></canvas></div>
+          </div>
+
+          <div class="chart-card">
+            <div class="chart-card-title">Expense Breakdown <span class="chart-card-sub">by category</span></div>
+            <div class="chart-wrap"><canvas id="pieChart"></canvas></div>
+          </div>
+
+          <!-- Budget section -->
+          <div class="section-header" style="margin-top:4px">
+            <div class="section-title">Monthly Budgets</div>
+            <button class="section-link" onclick="openBudgetModal()">+ Set Budget</button>
+          </div>
+          <div id="budgetList" class="glass-panel" style="padding:0 16px;margin-bottom:20px">
+            <div class="empty" style="padding:24px">
+              <div class="empty-text">No budgets set yet.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- WALLETS PAGE -->
+      <div class="page" id="p-wallets">
+        <div class="page-header" style="padding-top:max(16px,env(safe-area-inset-top))">
+          <button class="back-btn" onclick="goBack()">←</button>
+          <div class="page-title">Wallets</div>
+          <div style="width:36px"></div>
+        </div>
+        <div class="scroll-area">
+          <div class="wallet-balance-panel">
+            <div class="wallet-balance-label">Total Wallet Balance</div>
+            <div id="walletsTotalValue" class="wallet-balance-value">৳0.00</div>
+            <div class="wallet-balance-subtitle">Combined balance of all members</div>
+          </div>
+          <div class="section-header" style="margin-top:8px">
+            <div class="section-title">Wallet Transfer</div>
+            <button class="section-link" onclick="navigate('p-transfer-history')">Transfer History →</button>
+          </div>
+          <div class="glass-panel" style="padding:14px 16px;margin-bottom:16px">
+            <button class="modal-btn confirm" onclick="openTransferSheet()" style="width:100%">Make Transfer</button>
+          </div>
+
+          <div id="memberCards"></div>
+        </div>
+      </div>
+
+      <!-- TRANSFER HISTORY PAGE -->
+      <div class="page" id="p-transfer-history">
+        <div class="page-header" style="padding-top:max(16px,env(safe-area-inset-top))">
+          <button class="back-btn" onclick="goBack()">←</button>
+          <div class="page-title">Transfer History</div>
+          <div style="width:36px"></div>
+        </div>
+        <div style="padding:0 20px 12px;flex-shrink:0;">
+          <input class="form-input" id="transferSearchFilter" type="text" placeholder="Search by wallet or note..." oninput="renderTransferHistory()" style="width:100%;padding:10px 12px">
+        </div>
+        <div class="scroll-area" id="transferHistoryList"></div>
+      </div>
+
+      <!-- GOALS PAGE -->
+      <div class="page" id="p-goals">
+        <div class="page-header" style="padding-top:max(16px,env(safe-area-inset-top))">
+          <button class="back-btn" onclick="goBack()">←</button>
+          <div class="page-title">Savings Goals</div>
+          <button class="header-action" onclick="openGoalModal()" style="font-size:1.1rem">＋</button>
+        </div>
+        <div class="scroll-area">
+          <div id="goalsList">
+            <div class="empty">
+              <div class="empty-icon">🎯</div>
+              <div class="empty-text">No goals yet.<br>Tap + to add a savings goal!</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- DEBTS PAGE -->
+      <div class="page" id="p-debts">
+        <div class="page-header" style="padding-top:max(16px,env(safe-area-inset-top))">
+          <button class="back-btn" onclick="goBack()">←</button>
+          <div class="page-title">Debts & Loans</div>
+          <button class="header-action" onclick="openDebtModal()" style="font-size:1.1rem">＋</button>
+        </div>
+        <div class="scroll-area">
+          <div class="wallet-balance-panel" style="margin-bottom:16px;">
+            <div style="display:flex; gap:16px; margin-top:8px;">
+              <div style="flex:1;">
+                <div class="wallet-balance-label">You Owe</div>
+                <div id="debtsOweDisplay" class="wallet-balance-value" style="color:var(--red);font-size:1.4rem;">৳0.00
+                </div>
+              </div>
+              <div style="flex:1;">
+                <div class="wallet-balance-label">Owed to You</div>
+                <div id="debtsLentDisplay" class="wallet-balance-value" style="color:var(--green);font-size:1.4rem;">
+                  ৳0.00</div>
+              </div>
+            </div>
+          </div>
+          <div id="debtsList">
+            <div class="empty">
+              <div class="empty-icon">🤝</div>
+              <div class="empty-text">No active debts.<br>Tap + to track money lent or borrowed!</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RECURRING PAGE -->
+      <div class="page" id="p-recurring">
+        <div class="page-header" style="padding-top:max(16px,env(safe-area-inset-top))">
+          <button class="back-btn" onclick="goBack()">←</button>
+          <div class="page-title">Recurring</div>
+          <button class="header-action" onclick="openRecurringModal()" style="font-size:1.1rem">＋</button>
+        </div>
+        <div class="scroll-area">
+          <div style="padding:0 16px;margin-bottom:16px" id="recurringList" class="glass-panel">
+            <div class="empty" style="padding:24px">
+              <div class="empty-text">No recurring transactions.</div>
+            </div>
+          </div>
+          <div id="recurringUpcoming" style="display:none">
+            <div class="section-header">
+              <div class="section-title">Upcoming Bills</div>
+            </div>
+            <div id="upcomingList"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- NOTES PAGE -->
+      <div class="page" id="p-notes">
+        <div class="page-header" style="padding-top:max(16px,env(safe-area-inset-top))">
+          <button class="back-btn" onclick="backToSettings()">←</button>
+          <div class="page-title">Notebooks</div>
+          <button class="header-action" onclick="openNoteBookModal()" style="font-size:1.1rem">＋</button>
+        </div>
+        <div class="scroll-area">
+          <div class="notes-total-panel">
+            <div>
+              <div class="notes-total-label">All Notes Total</div>
+              <div class="notes-total-sub">Choose a notebook first</div>
+            </div>
+            <div class="notes-total-value" id="notesTotalValue">৳0.00</div>
+          </div>
+          <div id="noteBooksList">
+            <div class="empty">
+              <div class="empty-icon">🧾</div>
+              <div class="empty-text">No notebooks yet.<br>Tap + to create one!</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- NOTEBOOK DETAIL PAGE -->
+      <div class="page" id="p-note-detail">
+        <div class="page-header" style="padding-top:max(16px,env(safe-area-inset-top))">
+          <button class="back-btn" onclick="backToNoteBooks()">←</button>
+          <div class="page-title" id="noteBookTitle">Notebook</div>
+          <button class="header-action" onclick="openNoteModal()" style="font-size:1.1rem">＋</button>
+        </div>
+        <div class="scroll-area">
+          <div class="notes-total-panel">
+            <div>
+              <div class="notes-total-label">Notebook Total</div>
+              <div class="notes-total-sub" id="noteBookSub">Personal side notes</div>
+            </div>
+            <div class="notes-total-value" id="noteBookTotalValue">৳0.00</div>
+          </div>
+          <div id="notesList">
+            <div class="empty">
+              <div class="empty-icon">🧾</div>
+              <div class="empty-text">No entries yet.<br>Tap + to add one!</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SETTINGS PAGE -->
+      <div class="page" id="p-settings">
+        <div class="page-header" style="padding-top:max(16px,env(safe-area-inset-top))">
+          <button class="back-btn" onclick="goBack()">←</button>
+          <div class="page-title">Settings</div>
+          <div style="width:36px"></div>
+        </div>
+        <div class="scroll-area">
+          <!-- Profile -->
+          <div class="profile-card">
+            <div class="profile-scenery" aria-hidden="true">
+              <div class="profile-celestial"></div>
+              <div class="profile-cloud p1"></div>
+              <div class="profile-cloud p2"></div>
+              <div class="profile-cloud p3"></div>
+              <div class="profile-hills"></div>
+              <div class="profile-city"></div>
+            </div>
+            <div class="settings-avatar-wrap" id="settingsAvatarWrap" style="--ring-pct:0"
+              onclick="toggleProfilePhotoMenu()" title="Change profile photo">
+              <div class="settings-avatar-inner" id="settingsAvatar">U</div>
+              <button class="avatar-add-trigger" type="button"
+                onclick="event.stopPropagation(); toggleProfilePhotoMenu()" aria-label="Profile photo options"><span
+                  class="mi">add</span></button>
+            </div>
+            <div class="profile-name" id="settingsName">User</div>
+            <div class="profile-email" id="settingsEmail">—</div>
+            <div class="settings-avatar-hint" id="settingsAvatarHint">Budget ring: 0%</div>
+            <div class="profile-photo-menu" id="profilePhotoMenu">
+              <button class="profile-photo-menu-btn"
+                onclick="event.stopPropagation();triggerProfilePhotoPick()"><span>Add photo</span><span
+                  class="mi">upload</span></button>
+              <button class="profile-photo-menu-btn danger"
+                onclick="event.stopPropagation();clearProfilePhoto()"><span>Remove photo</span><span
+                  class="mi">delete</span></button>
+            </div>
+            <input class="profile-photo-input" id="profilePhotoInput" type="file" accept="image/*"
+              onchange="handleProfilePhotoPick(event)">
+          </div>
+
+          <div class="settings-panel">
+            <div class="settings-row" onclick="document.getElementById('settingsNotifToggle').click()" style="cursor:pointer">
+              <div class="settings-left">
+                <div class="settings-icon" style="background:rgba(56, 189, 248, 0.15); color:#38bdf8"><span
+                    class="mi">notifications_active</span></div>
+                <div>
+                  <div class="settings-label">Smart Reminders</div>
+                  <div class="settings-sub" id="settingsNotifSub">Daily engaging alerts</div>
+                </div>
+              </div>
+              <div class="checkbox-wrapper-5" onclick="event.stopPropagation();">
+                <div class="check">
+                  <input type="checkbox" id="settingsNotifToggle" onchange="toggleNotifications()">
+                  <label for="settingsNotifToggle"></label>
+                </div>
+              </div>
+            </div>
+            <div class="settings-row" onclick="document.getElementById('themeCheckbox').click()" style="cursor:pointer">
+              <div class="settings-left">
+                <div class="settings-icon" id="settingsThemeIcon"
+                  style="background:var(--purple-light); color:var(--purple)"><span class="mi">dark_mode</span></div>
+                <div>
+                  <div class="settings-label">Mode</div>
+                  <div class="settings-sub" id="settingsThemeSub">Dark mode</div>
+                </div>
+              </div>
+              <label class="theme-switch" for="themeCheckbox" onclick="event.stopPropagation()">
+                <input type="checkbox" id="themeCheckbox" class="theme-switch__checkbox" onchange="toggleTheme()">
+                <div class="theme-switch__container">
+                  <div class="theme-switch__circle-container">
+                    <div class="theme-switch__sun-moon-container">
+                      <div class="theme-switch__moon">
+                        <div class="theme-switch__spot"></div>
+                        <div class="theme-switch__spot"></div>
+                        <div class="theme-switch__spot"></div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="theme-switch__clouds"></div>
+                  <div class="theme-switch__stars-container">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 144 55" fill="none">
+                      <path fill-rule="evenodd" clip-rule="evenodd" d="M32.3275 1.51737C32.4042 0.354075 34.0205 0.285888 34.2096 1.43126C34.4093 2.64147 35.3409 3.55938 36.5557 3.74316C37.705 3.91741 37.7885 5.53457 36.626 5.62635C35.3995 5.72314 34.4385 6.64344 34.2384 7.86311C34.0494 9.01524 32.433 8.94828 32.3552 7.78508C32.2731 6.55998 31.3323 5.59013 30.108 5.40552C28.9515 5.23126 28.8687 3.61334 30.0357 3.52261C31.2661 3.42654 32.2341 2.49392 32.3275 1.51737Z" fill="currentColor"></path>
+                      <path fill-rule="evenodd" clip-rule="evenodd" d="M12.9818 19.3361C13.064 18.084 14.8027 18.0105 15.006 19.2435C15.2209 20.5463 16.223 21.5345 17.5304 21.7323C18.7672 21.92 18.857 23.6601 17.5997 23.7588C16.2796 23.863 15.2447 24.8536 15.0292 26.1666C14.8258 27.4064 13.0871 27.334 13.0034 26.082C12.9151 24.7641 11.9023 23.7203 10.5847 23.5218C9.33979 23.334 9.25055 21.5933 10.5064 21.4957C11.83 21.3923 12.8719 20.3888 12.9818 19.3361Z" fill="currentColor"></path>
+                      <path fill-rule="evenodd" clip-rule="evenodd" d="M23.0028 41.5235C23.0843 40.2818 24.8078 40.209 25.0094 41.4316C25.2223 42.7235 26.2163 43.7032 27.5126 43.8993C28.739 44.0853 28.828 45.8108 27.5813 45.9087C26.2723 46.0118 25.2461 46.994 25.0325 48.2959C24.8309 49.5255 23.1074 49.4534 23.0244 48.2117C22.9368 46.9048 21.9325 45.8698 20.626 45.6729C19.3916 45.4869 19.3032 43.7607 20.5484 43.664C21.8606 43.5615 22.8936 42.5666 23.0028 41.5235Z" fill="currentColor"></path>
+                    </svg>
+                  </div>
+                </div>
+              </label>
+            </div>
+            <div class="settings-row theme-row" onclick="toggleThemePicker()" style="display:flex">
+              <div class="settings-left">
+                <div class="settings-icon" style="background:var(--green-light); color:var(--green)"><span
+                    class="mi">palette</span></div>
+                <div>
+                  <div class="settings-label">Theme</div>
+                </div>
+              </div>
+              <div class="theme-current" id="themeCurrentLabel"><span>Rose Pay</span><span
+                  class="mi">keyboard_arrow_down</span></div>
+            </div>
+            <div class="theme-picker" id="themePicker" style="display:none"></div>
+            <div class="settings-row">
+              <div class="settings-left">
+                <div class="settings-icon" style="background:var(--yellow-light); color:var(--yellow)"><span
+                    class="mi">currency_exchange</span></div>
+                <div>
+                  <div class="settings-label">Currency</div>
+                  <div class="settings-sub" id="settingsCurLabel">BDT</div>
+                </div>
+              </div>
+              <select class="form-input" id="currencySelect" onchange="changeCurrency(this.value)"
+                style="width:auto;padding:8px 10px;font-size:0.82rem;font-weight:700">
+                <option value="BDT">৳ BDT</option>
+                <option value="USD">$ USD</option>
+                <option value="EUR">€ EUR</option>
+                <option value="GBP">£ GBP</option>
+                <option value="INR">₹ INR</option>
+                <option value="JPY">¥ JPY</option>
+                <option value="AUD">A$ AUD</option>
+                <option value="CAD">C$ CAD</option>
+                <option value="SGD">S$ SGD</option>
+                <option value="AED">د.إ AED</option>
+                <option value="SAR">﷼ SAR</option>
+                <option value="MYR">RM MYR</option>
+              </select>
+            </div>
+            <div class="settings-row" onclick="navigate('p-family')" style="cursor:pointer">
+              <div class="settings-left">
+                <div class="settings-icon" style="background:rgba(255,255,255,0.08); color:var(--text)"><span
+                    class="mi">group</span></div>
+                <div>
+                  <div class="settings-label">Family & Members</div>
+                  <div class="settings-sub">Manage accounts</div>
+                </div>
+              </div>
+              <div style="color:var(--text2);font-size:1rem">→</div>
+            </div>
+            <div class="settings-row" onclick="navigate('p-goals')" style="cursor:pointer">
+              <div class="settings-left">
+                <div class="settings-icon" style="background:var(--yellow-light); color:var(--yellow)"><span
+                    class="mi">track_changes</span></div>
+                <div>
+                  <div class="settings-label">Savings Goals</div>
+                  <div class="settings-sub">Track targets</div>
+                </div>
+              </div>
+              <div style="color:var(--text2);font-size:1rem">→</div>
+            </div>
+            <div class="settings-row" onclick="navigate('p-recurring')" style="cursor:pointer">
+              <div class="settings-left">
+                <div class="settings-icon" style="background:var(--purple-light); color:var(--purple)"><span
+                    class="mi">autorenew</span></div>
+                <div>
+                  <div class="settings-label">Recurring</div>
+                  <div class="settings-sub">Bills & subscriptions</div>
+                </div>
+              </div>
+              <div style="color:var(--text2);font-size:1rem">→</div>
+            </div>
+            <div class="settings-row" onclick="navigate('p-notes')" style="cursor:pointer">
+              <div class="settings-left">
+                <div class="settings-icon" style="background:var(--green-light); color:var(--green)"><span
+                    class="mi">edit_note</span></div>
+                <div>
+                  <div class="settings-label">Personal Notes</div>
+                  <div class="settings-sub">Small side notes</div>
+                </div>
+              </div>
+              <div style="color:var(--text2);font-size:1rem">→</div>
+            </div>
+            <div class="settings-row" onclick="exportCSV()" style="cursor:pointer">
+              <div class="settings-left">
+                <div class="settings-icon" style="background:#e0f7fa; color:#0097a7"><span class="mi">download</span>
+                </div>
+                <div>
+                  <div class="settings-label">Export Data</div>
+                  <div class="settings-sub">Download CSV</div>
+                </div>
+              </div>
+              <div style="color:var(--text2);font-size:1rem">→</div>
+            </div>
+          </div>
+
+          <div class="settings-panel" style="margin-bottom:0">
+            <div class="settings-row" onclick="logout()" style="cursor:pointer">
+              <div class="settings-left">
+                <div class="settings-icon" style="background:var(--red-light); color:var(--red)"><span
+                    class="mi">logout</span></div>
+                <div>
+                  <div class="settings-label" style="color:var(--red)">Log Out</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div
+            style="text-align: center; padding: 24px 20px 10px; font-size: 0.8rem; color: var(--text2); opacity: 0.7; font-weight: 500;">
+            Developed by <a href="https://www.instagram.com/priomm___/" target="_blank"
+              style="color: inherit; text-decoration: underline;"><b>Priom Kanti Das</b></a>
+          </div>
+
+          <div style="height:20px"></div>
+        </div>
+      </div>
+
+      <!-- FAMILY PAGE -->
+      <div class="page" id="p-family">
+        <div class="page-header" style="padding-top:max(16px,env(safe-area-inset-top))">
+          <button class="back-btn" onclick="goBack()">←</button>
+          <div class="page-title">Family</div>
+          <button class="header-action" onclick="openMemberModal()" style="font-size:1.1rem">＋</button>
+        </div>
+        <div class="scroll-area" id="familyList"></div>
+      </div>
+
+    </div><!-- /pages -->
+
+    <!-- BOTTOM NAV -->
+    <nav id="bottomNav">
+      <div id="navBlob" class="nav-blob"></div>
+      <button class="nav-item active" id="nav-home" onclick="navTo('home')">
+        <div class="nav-icon"><span class="mi">home</span></div>
+        <span class="nav-label">Home</span>
+      </button>
+      <button class="nav-item" id="nav-stats" onclick="navTo('stats')">
+        <div class="nav-icon"><span class="mi">insert_chart</span></div>
+        <span class="nav-label">Analytics</span>
+      </button>
+      <button class="nav-add" onclick="openAddSheet('expense')">＋</button>
+      <button class="nav-item" id="nav-wallets" onclick="navTo('wallets')">
+        <div class="nav-icon"><span class="mi">account_balance_wallet</span></div>
+        <span class="nav-label">Wallets</span>
+      </button>
+      <button class="nav-item" id="nav-debts" onclick="navTo('debts')">
+        <div class="nav-icon"><span class="mi">handshake</span></div>
+        <span class="nav-label">Debts</span>
+      </button>
+    </nav>
+
+    <!-- ADD TRANSACTION SHEET -->
+    <div id="addSheet">
+      <div class="sheet-header">
+        <div class="sheet-title">New Transaction</div>
+        <button class="sheet-close" onclick="closeAddSheet()">✕</button>
+      </div>
+      <div class="amount-display">
+        <div class="amount-label">Amount</div>
+        <div class="amount-big" id="amountDisplay">৳0</div>
+        <div class="amount-hint" id="amountHint"></div>
+      </div>
+      <div class="type-pills">
+        <button class="type-pill active inc" id="pillInc" onclick="setSheetType('income')">+ Income</button>
+        <button class="type-pill exp" id="pillExp" onclick="setSheetType('expense')">− Expense</button>
+      </div>
+      <div class="sheet-form" id="sheetForm">
+        <div class="form-row">
+          <div class="form-section">
+            <div class="form-label">Amount *</div>
+            <input class="form-input" id="fAmount" type="number" placeholder="0.00" min="0" step="0.01"
+              oninput="updateAmountDisplay()">
+          </div>
+          <div class="form-section">
+            <div class="form-label">Date *</div>
+            <input class="form-input" id="fDate" type="date">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-section">
+            <div class="form-label">Who? *</div>
+            <select class="form-input" id="fMember" onchange="updateWalletDropdown()"></select>
+          </div>
+          <div class="form-section" id="fWalletSection">
+            <div class="form-label">Wallet</div>
+            <select class="form-input" id="fWallet" onchange="updateAmountDisplay()"></select>
+          </div>
+        </div>
+        <div class="form-section">
+          <div class="form-label">Category *</div>
+          <div class="cat-chips" id="catChips"></div>
+        </div>
+        <div class="form-section">
+          <div class="form-label">Note (optional)</div>
+          <input class="form-input" id="fNote" type="text" placeholder="What was this for?">
+        </div>
+        <!-- Recurring toggle -->
+        <div class="form-section" style="display:flex;align-items:center;justify-content:space-between;padding:4px 0">
+          <div>
+            <div style="font-size:0.88rem;font-weight:700">Make Recurring?</div>
+            <div style="font-size:0.75rem;color:var(--text2);font-weight:600">Auto-add every month</div>
+          </div>
+          <button class="rec-toggle" id="recurringToggle" onclick="toggleRecurring()"></button>
+        </div>
+        <div id="recurringFreqSection" style="display:none;margin-bottom:12px">
+          <div class="form-label">Frequency</div>
+          <select class="form-input" id="fFreq">
+            <option value="monthly">Monthly</option>
+            <option value="weekly">Weekly</option>
+            <option value="yearly">Yearly</option>
+          </select>
+        </div>
+        <div style="height:8px"></div>
+      </div>
+      <div class="sheet-footer">
+        <button class="submit-big inc" id="submitBtn" onclick="addTransaction()">Add Income</button>
+      </div>
+    </div>
+
+    <!-- TRANSFER WALLET SHEET -->
+    <div id="transferSheet">
+      <div class="sheet-header">
+        <div class="sheet-title">Transfer Wallet Balance</div>
+        <button class="sheet-close" onclick="closeTransferSheet()">✕</button>
+      </div>
+      <div class="amount-display">
+        <div class="amount-label">Amount</div>
+        <div class="amount-big" id="tAmountDisplay" style="color:#38bdf8">৳0</div>
+      </div>
+      <div class="sheet-form" id="transferForm">
+        <div class="form-row">
+          <div class="form-section">
+            <div class="form-label">From Member</div>
+            <select class="form-input" id="tFromMember" onchange="populateTransferWallets('from')"></select>
+          </div>
+          <div class="form-section">
+            <div class="form-label">From Wallet *</div>
+            <select class="form-input" id="tFromWallet" onchange="updateTransferDisplay()"></select>
+          </div>
+        </div>
+        <div id="tFromBalanceInfo"
+          style="font-size:0.78rem; color:var(--text2); margin-top:-8px; margin-bottom:12px; font-weight:600;"></div>
+
+        <div class="form-row">
+          <div class="form-section">
+            <div class="form-label">To Member</div>
+            <select class="form-input" id="tToMember" onchange="populateTransferWallets('to')"></select>
+          </div>
+          <div class="form-section">
+            <div class="form-label">To Wallet *</div>
+            <select class="form-input" id="tToWallet"></select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-section">
+            <div class="form-label">Amount *</div>
+            <input class="form-input" id="tAmount" type="number" placeholder="0.00" min="0" step="0.01"
+              oninput="updateTransferDisplay()">
+          </div>
+          <div class="form-section">
+            <div class="form-label">Date *</div>
+            <input class="form-input" id="tDate" type="date">
+          </div>
+        </div>
+        <div class="form-section">
+          <div class="form-label">Note (optional)</div>
+          <input class="form-input" id="tNote" type="text" placeholder="e.g., Transfer to bKash">
+        </div>
+        <div style="height:8px"></div>
+      </div>
+      <div class="sheet-footer">
+        <button class="submit-big" id="tSubmitBtn" style="background:#38bdf8;color:white"
+          onclick="addTransfer()">Complete Transfer</button>
+      </div>
+    </div>
+
+    <!-- MODALS -->
+    <!-- Edit transaction modal -->
+    <div class="modal-overlay" id="editModal" onclick="if(event.target===this)closeModal('editModal')">
+      <div class="modal-box">
+        <div class="modal-handle"></div>
+        <div class="modal-title">Edit Transaction</div>
+        <div class="form-row">
+          <div class="form-section">
+            <div class="form-label">Amount</div><input class="form-input" id="eAmount" type="number" min="0"
+              step="0.01">
+          </div>
+          <div class="form-section">
+            <div class="form-label">Date</div><input class="form-input" id="eDate" type="date">
+          </div>
+        </div>
+        <div class="form-section">
+          <div class="form-label">Category</div><select class="form-input" id="eCategory"></select>
+        </div>
+        <div class="form-section">
+          <div class="form-label">Note</div><input class="form-input" id="eNote" type="text">
+        </div>
+        <div class="modal-btns">
+          <button class="modal-btn cancel" onclick="closeModal('editModal')">Cancel</button>
+          <button class="modal-btn confirm" onclick="saveEdit()">Save</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Member modal -->
+    <div class="modal-overlay" id="memberModal" onclick="if(event.target===this)closeModal('memberModal')">
+      <div class="modal-box">
+        <div class="modal-handle"></div>
+        <div class="modal-title">Add Member</div>
+        <div class="form-section">
+          <div class="form-label">Name</div><input class="form-input" id="mName" placeholder="e.g. Wife, Son, Myself">
+        </div>
+        <div class="modal-btns">
+          <button class="modal-btn cancel" onclick="closeModal('memberModal')">Cancel</button>
+          <button class="modal-btn confirm" onclick="saveMember()">Add Member</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Wallet modal -->
+    <div class="modal-overlay" id="walletModal" onclick="if(event.target===this)closeModal('walletModal')">
+      <div class="modal-box">
+        <div class="modal-handle"></div>
+        <div class="modal-title">Add Wallet</div>
+        <input type="hidden" id="wMemberId">
+        <div class="form-section">
+          <div class="form-label">Wallet Name</div><input class="form-input" id="wName"
+            placeholder="e.g. bKash, DBBL Bank">
+        </div>
+        <div class="form-row">
+          <div class="form-section">
+            <div class="form-label">Type</div>
+            <select class="form-input" id="wType">
+              <option>Cash</option>
+              <option>bKash</option>
+              <option>Nagad</option>
+              <option>Rocket</option>
+              <option>Bank</option>
+              <option>Card</option>
+            </select>
+          </div>
+          <div class="form-section">
+            <div class="form-label">Balance</div><input class="form-input" id="wBalance" type="number" value="0"
+              step="0.01">
+          </div>
+        </div>
+        <div class="modal-btns">
+          <button class="modal-btn cancel" onclick="closeModal('walletModal')">Cancel</button>
+          <button class="modal-btn confirm" onclick="saveWallet()">Add Wallet</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Edit wallet modal -->
+    <div class="modal-overlay" id="editWalletModal" onclick="if(event.target===this)closeModal('editWalletModal')">
+      <div class="modal-box">
+        <div class="modal-handle"></div>
+        <div class="modal-title">Edit Wallet</div>
+        <input type="hidden" id="ewId">
+        <div class="form-section">
+          <div class="form-label">Wallet Name</div><input class="form-input" id="ewName">
+        </div>
+        <div class="form-row">
+          <div class="form-section">
+            <div class="form-label">Type</div>
+            <select class="form-input" id="ewType">
+              <option>Cash</option>
+              <option>bKash</option>
+              <option>Nagad</option>
+              <option>Rocket</option>
+              <option>Bank</option>
+              <option>Card</option>
+            </select>
+          </div>
+          <div class="form-section">
+            <div class="form-label">Initial Balance</div><input class="form-input" id="ewBalance" type="number"
+              step="0.01">
+          </div>
+        </div>
+        <div class="modal-btns">
+          <button class="modal-btn cancel" onclick="closeModal('editWalletModal')">Cancel</button>
+          <button class="modal-btn confirm" onclick="saveEditedWallet()">Save</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Goal modal -->
+    <div class="modal-overlay" id="goalModal" onclick="if(event.target===this)closeModal('goalModal')">
+      <div class="modal-box">
+        <div class="modal-handle"></div>
+        <div class="modal-title">New Savings Goal</div>
+        <div class="form-section">
+          <div class="form-label">Goal Name</div><input class="form-input" id="gName"
+            placeholder="e.g. New Phone, Vacation">
+        </div>
+        <div class="form-row">
+          <div class="form-section">
+            <div class="form-label">Target Amount</div><input class="form-input" id="gTarget" type="number" step="0.01"
+              placeholder="0.00">
+          </div>
+          <div class="form-section">
+            <div class="form-label">Saved So Far</div><input class="form-input" id="gSaved" type="number" step="0.01"
+              value="0">
+          </div>
+        </div>
+        <div class="form-section">
+          <div class="form-label">Color</div>
+          <select class="form-input" id="gColor">
+            <option value="var(--purple)">Purple</option>
+            <option value="var(--green)">Green</option>
+            <option value="var(--yellow)">Yellow</option>
+            <option value="var(--red)">Red</option>
+            <option value="#38bdf8">Blue</option>
+            <option value="#f472b6">Pink</option>
+          </select>
+        </div>
+        <div class="modal-btns">
+          <button class="modal-btn cancel" onclick="closeModal('goalModal')">Cancel</button>
+          <button class="modal-btn confirm" onclick="saveGoal()">Add Goal</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Budget modal -->
+    <div class="modal-overlay" id="budgetModal" onclick="if(event.target===this)closeModal('budgetModal')">
+      <div class="modal-box">
+        <div class="modal-handle"></div>
+        <div class="modal-title">Set Monthly Budget</div>
+        <div class="form-section">
+          <div class="form-label">Category</div>
+          <select class="form-input" id="bCategory"></select>
+        </div>
+        <div class="form-section">
+          <div class="form-label">Monthly Limit</div><input class="form-input" id="bLimit" type="number" step="0.01"
+            placeholder="0.00">
+        </div>
+        <div class="modal-btns">
+          <button class="modal-btn cancel" onclick="closeModal('budgetModal')">Cancel</button>
+          <button class="modal-btn confirm" onclick="saveBudget()">Save Budget</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recurring modal -->
+    <div class="modal-overlay" id="recurringModal" onclick="if(event.target===this)closeModal('recurringModal')">
+      <div class="modal-box">
+        <div class="modal-handle"></div>
+        <div class="modal-title">Add Recurring</div>
+        <div class="form-section">
+          <div class="form-label">Name</div><input class="form-input" id="rName" placeholder="e.g. Netflix, Rent">
+        </div>
+        <div class="form-row">
+          <div class="form-section">
+            <div class="form-label">Amount</div><input class="form-input" id="rAmount" type="number" step="0.01">
+          </div>
+          <div class="form-section">
+            <div class="form-label">Type</div>
+            <select class="form-input" id="rType">
+              <option value="expense">Expense</option>
+              <option value="income">Income</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-section">
+            <div class="form-label">Frequency</div>
+            <select class="form-input" id="rFreq">
+              <option value="monthly">Monthly</option>
+              <option value="weekly">Weekly</option>
+              <option value="yearly">Yearly</option>
+            </select>
+          </div>
+          <div class="form-section">
+            <div class="form-label">Next Date</div><input class="form-input" id="rDate" type="date">
+          </div>
+        </div>
+        <div class="modal-btns">
+          <button class="modal-btn cancel" onclick="closeModal('recurringModal')">Cancel</button>
+          <button class="modal-btn confirm" onclick="saveRecurring()">Save</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Note book modal -->
+    <div class="modal-overlay" id="noteBookModal" onclick="if(event.target===this)closeModal('noteBookModal')">
+      <div class="modal-box">
+        <div class="modal-handle"></div>
+        <div class="modal-title">New Notebook</div>
+        <div class="form-section">
+          <div class="form-label">Notebook Name</div>
+          <input class="form-input" id="noteBookName" placeholder="e.g. Mudir dokan">
+        </div>
+        <div class="form-section">
+          <div class="form-label">Short Note</div>
+          <input class="form-input" id="noteBookDesc" placeholder="Optional">
+        </div>
+        <div class="modal-btns">
+          <button class="modal-btn cancel" onclick="closeModal('noteBookModal')">Cancel</button>
+          <button class="modal-btn confirm" onclick="saveNoteBook()">Create</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Note modal -->
+    <div class="modal-overlay" id="noteModal" onclick="if(event.target===this)closeModal('noteModal')">
+      <div class="modal-box">
+        <div class="modal-handle"></div>
+        <div class="modal-title">Add Hisab</div>
+        <div class="form-section">
+          <div class="form-label">Item</div>
+          <input class="form-input" id="noteTitle" placeholder="e.g. Rice, oil, snacks">
+        </div>
+        <div class="form-row">
+          <div class="form-section">
+            <div class="form-label">Amount</div>
+            <input class="form-input" id="noteAmount" type="number" step="0.01" placeholder="0.00">
+          </div>
+          <div class="form-section">
+            <div class="form-label">Date</div>
+            <input class="form-input" id="noteDate" type="date">
+          </div>
+        </div>
+        <div class="form-section">
+          <div class="form-label">Details</div>
+          <input class="form-input" id="noteDetails" placeholder="What did you buy?">
+        </div>
+        <div class="modal-btns">
+          <button class="modal-btn cancel" onclick="closeModal('noteModal')">Cancel</button>
+          <button class="modal-btn confirm" onclick="saveNote()">Save</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Debt modal -->
+    <div class="modal-overlay" id="debtModal" onclick="if(event.target===this)closeModal('debtModal')">
+      <div class="modal-box">
+        <div class="modal-handle"></div>
+        <div class="modal-title" id="debtModalTitle">Add Debt / Loan</div>
+        <input type="hidden" id="dId">
+        <div class="form-section">
+          <div class="form-label">Person Name</div><input class="form-input" id="dName" placeholder="e.g. John, Alice">
+        </div>
+        <div class="form-section">
+          <div class="form-label">Total Amount</div><input class="form-input" id="dAmount" type="number" step="0.01"
+            placeholder="0.00">
+        </div>
+        <div class="form-row">
+          <div class="form-section">
+            <div class="form-label">Type</div>
+            <select class="form-input" id="dType">
+              <option value="borrowed">I Borrowed</option>
+              <option value="lent">I Lent</option>
+            </select>
+          </div>
+          <div class="form-section">
+            <div class="form-label">Already Cleared?</div><input class="form-input" id="dCleared" type="number"
+              step="0.01" placeholder="0.00" value="0">
+          </div>
+        </div>
+        <div class="form-section" style="display:flex;align-items:center;justify-content:space-between;padding:4px 0">
+          <div>
+            <div style="font-size:0.88rem;font-weight:700">Auto-Pay Installment?</div>
+            <div style="font-size:0.75rem;color:var(--text2);font-weight:600">Auto-clears debt regularly</div>
+          </div>
+          <button class="rec-toggle" id="dRecToggle" onclick="toggleDebtRecurring()"></button>
+        </div>
+        <div id="dRecSection" style="display:none;margin-bottom:12px">
+          <div class="form-row">
+            <div class="form-section">
+              <div class="form-label">Amount per pay</div>
+              <input class="form-input" id="dRecAmount" type="number" step="0.01">
+            </div>
+            <div class="form-section">
+              <div class="form-label">Frequency</div>
+              <select class="form-input" id="dRecFreq">
+                <option value="monthly">Monthly</option>
+                <option value="weekly">Weekly</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-section">
+            <div class="form-label">Next Payment Date</div>
+            <input class="form-input" id="dRecNext" type="date">
+          </div>
+        </div>
+        <div class="form-section">
+          <div class="form-label">Due Date (Optional)</div><input class="form-input" id="dDueDate" type="date">
+        </div>
+        <div class="form-section">
+          <div class="form-label">Note</div><input class="form-input" id="dNote" placeholder="What was this for?">
+        </div>
+        <div class="modal-btns">
+          <button class="modal-btn cancel" onclick="closeModal('debtModal')">Cancel</button>
+          <button class="modal-btn confirm" onclick="saveDebt()">Save Debt</button>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /appShell -->
+
+  <!-- Debt Pay modal -->
+  <div class="modal-overlay" id="debtPayModal" onclick="if(event.target===this)closeModal('debtPayModal')">
+    <div class="modal-box">
+      <div class="modal-handle"></div>
+      <div class="modal-title">Add Payment</div>
+      <input type="hidden" id="dpId">
+      <div class="form-section">
+        <div class="form-label">Amount to Clear</div><input class="form-input" id="dpAmount" type="number" step="0.01"
+          placeholder="0.00">
+      </div>
+      <div class="modal-btns">
+        <button class="modal-btn cancel" onclick="closeModal('debtPayModal')">Cancel</button>
+        <button class="modal-btn confirm" onclick="saveDebtPayment()">Save Payment</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ACTION LOADER -->
+  <div id="actionLoader" style="display:none; position:fixed; inset:0; z-index:10000; background:rgba(0,0,0,0.4); backdrop-filter:blur(3px); -webkit-backdrop-filter:blur(3px); align-items:center; justify-content:center; opacity:0; transition: opacity 0.2s;">
+    <div style="background:var(--surface); padding:20px 28px; border-radius:20px; display:flex; align-items:center; justify-content:center; box-shadow:0 8px 32px rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.05); overflow:hidden;">
+      <div aria-label="Orange and tan hamster running in a metal wheel" role="img" class="wheel-and-hamster">
+        <div class="wheel"></div>
+        <div class="hamster">
+          <div class="hamster__body">
+            <div class="hamster__head">
+              <div class="hamster__ear"></div>
+              <div class="hamster__eye"></div>
+              <div class="hamster__nose"></div>
+            </div>
+            <div class="hamster__limb hamster__limb--fr"></div>
+            <div class="hamster__limb hamster__limb--fl"></div>
+            <div class="hamster__limb hamster__limb--br"></div>
+            <div class="hamster__limb hamster__limb--bl"></div>
+            <div class="hamster__tail"></div>
+          </div>
+        </div>
+        <div class="spoke"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SPLASH / INITIAL LOADING SCREEN -->
+  <div id="loadingScreen" style="position:fixed; inset:0; z-index:99999; background:var(--bg); display:flex; flex-direction:column; align-items:center; justify-content:center;">
+    <div style="width:80px; height:80px; margin-bottom:24px;">
+      <img src="logo.png" alt="Ledger Logo" style="width:100%; height:100%; border-radius:22px; box-shadow:0 8px 24px rgba(0,0,0,0.2);">
+    </div>
+    <div style="font-size:1.6rem; font-weight:800; color:var(--text); letter-spacing:-0.5px; margin-bottom: 24px;">Ledger</div>
+    <!-- Spinner -->
+    <div style="width:36px; height:36px; border:4px solid var(--purple-light); border-top-color:var(--purple); border-radius:50%; animation:spin 1s linear infinite;"></div>
+    <div style="font-size:0.9rem; font-weight:600; color:var(--text2); margin-top:16px;">Verifying securely...</div>
+  </div>
+
+  <!-- AUTH — Premium Glassmorphic Login -->
+  <div id="auth" style="display:none">
+    <!-- Animated mesh gradient background -->
+    <div class="auth-bg">
+      <div class="auth-orb auth-orb-1"></div>
+      <div class="auth-orb auth-orb-2"></div>
+      <div class="auth-orb auth-orb-3"></div>
+      <div class="auth-orb auth-orb-4"></div>
+    </div>
+
+    <!-- Glassmorphic login card -->
+    <div class="auth-card">
+      <!-- Logo -->
+      <div class="auth-logo">
+        <img src="logo.png?v=2" alt="Ledger Logo">
+      </div>
+      <div class="auth-title">Ledger</div>
+      <div class="auth-sub" id="authSub">Sign in to your account</div>
+
+      <div class="auth-form">
+        <!-- Floating label: Email -->
+        <div class="float-group">
+          <input class="float-input" id="emailInput" type="email" placeholder=" " autocomplete="off" required>
+          <label class="float-label" for="emailInput">Email</label>
+          <div class="float-bar"></div>
+        </div>
+
+        <!-- Floating label: Password -->
+        <div class="float-group">
+          <input class="float-input" id="passwordInput" type="password" placeholder=" " required
+            style="padding-right:46px;">
+          <label class="float-label" for="passwordInput">Password</label>
+          <div class="float-bar"></div>
+          <button class="pwd-eye" id="passwordToggleBtn" onclick="togglePasswordVisibility()" type="button"
+            tabindex="-1">
+            <span class="mi sm" id="passwordToggleIcon">visibility</span>
+          </button>
+        </div>
+
+        <!-- Registration: Name (hidden) -->
+        <div class="float-group" id="nameGroup" style="display:none">
+          <input class="float-input" id="nameInput" type="text" placeholder=" " maxlength="30">
+          <label class="float-label" for="nameInput">Your Name</label>
+          <div class="float-bar"></div>
+        </div>
+
+        <!-- Registration: Currency (hidden) -->
+        <div class="float-group" id="currencyGroup" style="display:none">
+          <select class="float-input float-select" id="obCurrency">
+            <option value="BDT">৳ BDT — Bangladeshi Taka</option>
+            <option value="USD">$ USD — US Dollar</option>
+            <option value="EUR">€ EUR — Euro</option>
+            <option value="GBP">£ GBP — British Pound</option>
+            <option value="INR">₹ INR — Indian Rupee</option>
+            <option value="JPY">¥ JPY — Japanese Yen</option>
+            <option value="AUD">A$ AUD</option>
+            <option value="CAD">C$ CAD</option>
+            <option value="SGD">S$ SGD</option>
+            <option value="AED">د.إ AED</option>
+            <option value="SAR">﷼ SAR</option>
+            <option value="MYR">RM MYR</option>
+          </select>
+          <label class="float-label float-label-up">Currency</label>
+          <div class="float-bar"></div>
+        </div>
+
+        <!-- Auth button with loading spinner -->
+        <button class="auth-btn" id="authBtn" onclick="handleAuth()">
+          <span class="auth-btn-text">Sign In</span>
+          <span class="auth-btn-spinner"></span>
+        </button>
+
+        <div class="auth-divider"><span>or</span></div>
+
+        <button class="auth-google" onclick="handleGoogleAuth()">
+          <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="18" height="18" alt="">
+          Continue with Google
+        </button>
+
+        <button id="forgotPwdBtn" class="auth-forgot-link" type="button" onclick="handleForgotPassword()">Forgot your
+          password?</button>
+
+        <div class="auth-toggle" onclick="toggleAuth()"><span id="authToggle">New here? <b>Create account</b></span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js?v=16"></script>
+
+</body>
+
+</html>
