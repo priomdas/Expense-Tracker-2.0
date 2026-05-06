@@ -408,7 +408,7 @@ body {
   flex: 1;
   overflow-y: auto;
   overflow-x: hidden;
-  padding: 0 20px 24px;
+  padding: 12px 20px 24px;
   -webkit-overflow-scrolling: touch;
 }
 
@@ -4663,6 +4663,8 @@ button:focus-visible,
   -webkit-tap-highlight-color: transparent;
   transition: background 0.2s ease;
   border-radius: 0 !important;
+  position: relative;
+  z-index: 2;
 }
 .tx-item.compact:hover {
   background: rgba(255, 255, 255, 0.025) !important;
