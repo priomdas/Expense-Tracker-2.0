@@ -2929,19 +2929,44 @@ select.form-input {
 }
 
 .modal-overlay {
-  position: absolute;
-  inset: 0;
-  z-index: 1000;
+  position: fixed !important;
+  inset: 0 !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  height: 100dvh !important;
+  z-index: 9999 !important;
   background: rgba(0, 0, 0, 0.7);
   display: none;
   align-items: flex-end;
   justify-content: center;
   backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   animation: fadeIn 0.2s ease;
 }
 
 .modal-overlay.open {
-  display: flex
+  display: flex !important;
+}
+
+/* Closing animation: overlay fades out, modal box slides down. */
+.modal-overlay.closing {
+  display: flex !important;
+  animation: fadeOut 0.28s ease forwards;
+}
+.modal-overlay.closing .modal-box {
+  animation: modalSlideDown 0.32s cubic-bezier(0.4, 0, 0.6, 1) forwards;
+}
+@keyframes fadeOut {
+  from { opacity: 1; }
+  to   { opacity: 0; }
+}
+@keyframes modalSlideDown {
+  from { opacity: 1; transform: translateY(0) scale(1); }
+  to   { opacity: 0; transform: translateY(40px) scale(0.98); }
 }
 
 .modal-box {
@@ -4469,10 +4494,12 @@ select.form-input {
   from { opacity: 0; transform: translateX(-12px); }
   to   { opacity: 1; transform: translateX(0); }
 }
-#goalsList .goal-item,
-#debtsList .goal-item,
-#memberCards .member-card,
-#familyList .member-card {
+/* Only animate cards on first page entry (when container has .fresh).
+   This prevents flicker/re-animation after add/edit/delete re-renders. */
+#goalsList.fresh .goal-item,
+#debtsList.fresh .goal-item,
+#memberCards.fresh .member-card,
+#familyList.fresh .member-card {
   animation: goalItemEnter 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 

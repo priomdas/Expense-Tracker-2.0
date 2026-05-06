@@ -1,5 +1,5 @@
 // ─── BUILD MARKER (use this to verify cache is fresh) ───
-console.log('%c[Ledger] Build v16 loaded (modern home page)', 'background:#5e5ce6;color:#fff;padding:4px 10px;border-radius:4px;font-weight:bold');
+console.log('%c[Ledger] Build v20 loaded (modal overlay full-screen fix)', 'background:#5e5ce6;color:#fff;padding:4px 10px;border-radius:4px;font-weight:bold');
 
 // XSS Mitigation Helper
 function escapeHTML(str) {
@@ -155,17 +155,28 @@ const THEME_ACCENTS = {
 };
 
 // ─── NAVIGATION ───
+// Marks a container as "fresh" so its entrance animation runs on this
+// page-entry render only. Subsequent re-renders (after add/edit/delete)
+// do NOT re-animate, preventing the flicker glitch.
+function markFresh(containerId) {
+  const c = document.getElementById(containerId);
+  if (!c) return;
+  c.classList.add('fresh');
+  // Clear after the entrance animation completes (~500ms + buffer).
+  setTimeout(() => c.classList.remove('fresh'), 700);
+}
+
 function refreshPage(pageId) {
   if (pageId === 'p-home') renderHome();
   if (pageId === 'p-stats') rebuildCharts();
-  if (pageId === 'p-wallets') renderWallets();
-  if (pageId === 'p-family') renderFamily();
-  if (pageId === 'p-goals') renderGoals();
+  if (pageId === 'p-wallets') { markFresh('memberCards'); renderWallets(); }
+  if (pageId === 'p-family') { markFresh('familyList'); renderFamily(); }
+  if (pageId === 'p-goals') { markFresh('goalsList'); renderGoals(); }
   if (pageId === 'p-recurring') renderRecurring();
   if (pageId === 'p-notes') renderNotes();
   if (pageId === 'p-note-detail') renderNoteBookDetail();
   if (pageId === 'p-transactions') renderFullTx();
-  if (pageId === 'p-debts') renderDebts();
+  if (pageId === 'p-debts') { markFresh('debtsList'); renderDebts(); }
   if (pageId === 'p-transfer-history') renderTransferHistory();
   // Always update main stats behind the scenes just in case
   refreshStats();
@@ -1496,13 +1507,46 @@ function syncModalState() {
 }
 
 function openModal(id) {
-  document.getElementById(id).classList.add('open');
+  const m = document.getElementById(id);
+  if (!m) return;
+  // Lift the modal to <body> so no ancestor (with overflow/transform/etc.)
+  // can clip or constrain the fixed-position overlay. Idempotent.
+  if (m.parentElement !== document.body) {
+    document.body.appendChild(m);
+  }
+  // If a previous close animation is still running, cancel it.
+  m.classList.remove('closing');
+  m.classList.add('open');
   syncModalState();
 }
 
 function closeModal(id) {
-  document.getElementById(id).classList.remove('open');
+  const m = document.getElementById(id);
+  if (!m || !m.classList.contains('open') || m.classList.contains('closing')) return;
+  const box = m.querySelector('.modal-box');
+  // Drop .open immediately so the .modal-overlay.open .modal-box modalPop
+  // animation stops competing with the slide-down. The .closing class
+  // keeps it visible (display:flex) until the exit animation finishes.
+  m.classList.remove('open');
+  m.classList.add('closing');
   syncModalState();
+  const finish = () => {
+    m.classList.remove('closing');
+  };
+  if (box) {
+    let done = false;
+    const onEnd = (e) => {
+      if (e.target !== box || done) return;
+      done = true;
+      box.removeEventListener('animationend', onEnd);
+      finish();
+    };
+    box.addEventListener('animationend', onEnd);
+    // Safety fallback in case animationend never fires.
+    setTimeout(() => { if (!done) { done = true; box.removeEventListener('animationend', onEnd); finish(); } }, 450);
+  } else {
+    setTimeout(finish, 320);
+  }
 }
 
 function syncThemeSettingUI() {
