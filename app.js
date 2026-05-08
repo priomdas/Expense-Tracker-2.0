@@ -714,7 +714,12 @@ function txHTML(t, showActs = true) {
     walletName = escapeHTML(t.deletedWalletName) + ' (deleted)';
     walletDeleted = true;
   }
-  const metaLine = memberName || safeNote || safeCat;
+  // Show member/note name first, then category after it (e.g. "Tirtho · Transport").
+  const metaParts = [];
+  if (memberName) metaParts.push(memberName);
+  else if (safeNote) metaParts.push(safeNote);
+  metaParts.push(safeCat);
+  const metaLine = metaParts.join(' · ');
   const acts = showActs ? `
     <button class="tx-detail-btn" onclick="openEdit('${t.id}'); event.stopPropagation();"><span class="mi sm">edit</span> Edit</button>
     <button class="tx-detail-btn danger" onclick="deleteTx('${t.id}'); event.stopPropagation();"><span class="mi sm">delete</span> Delete</button>` : '';
@@ -1345,23 +1350,64 @@ async function deleteNote(i) {
 }
 
 // ─── WALLETS ───
+// Track which member cards are currently expanded across re-renders.
+const expandedMemberCards = new Set();
+
+function toggleMemberCard(memberId) {
+  const card = document.querySelector(`.member-card[data-member-id="${CSS.escape(memberId)}"]`);
+  if (!card) return;
+  const isOpen = card.classList.toggle('expanded');
+  if (isOpen) expandedMemberCards.add(memberId);
+  else expandedMemberCards.delete(memberId);
+  uiVibrate('light');
+}
+
 function renderWallets() {
   const totalAllWallets = state.wallets.reduce((sum, w) => sum + getLiveWalletBalance(w.id), 0);
   const totalEl = document.getElementById('walletsTotalValue');
   if (totalEl) totalEl.textContent = fmt(totalAllWallets);
 
-  // Member cards
-  document.getElementById('memberCards').innerHTML = state.members.map(m => {
+  // Only show members who actually have wallets created.
+  const membersWithWallets = state.members.filter(m =>
+    state.wallets.some(w => w.memberId === m.id)
+  );
+
+  if (!membersWithWallets.length) {
+    document.getElementById('memberCards').innerHTML = `
+      <div class="empty" style="padding:24px">
+        <div class="empty-icon">👛</div>
+        <div class="empty-text">No wallets yet.<br>Go to <b>Family</b> and add a wallet to a member.</div>
+      </div>`;
+    return;
+  }
+
+  document.getElementById('memberCards').innerHTML = membersWithWallets.map(m => {
     const mWallets = state.wallets.filter(w => w.memberId === m.id);
     const total = mWallets.reduce((s, w) => s + getLiveWalletBalance(w.id), 0);
+    const isExpanded = expandedMemberCards.has(m.id);
     const walletsHtml = mWallets.map(w => {
       const bal = getLiveWalletBalance(w.id);
-      return `<div class="wallet-row"><div class="wallet-left"><div class="wallet-dot" style="background:var(--purple)"></div><div><div class="wallet-name">${escapeHTML(w.name)}</div><div class="wallet-type">${escapeHTML(w.type)}</div></div></div><div style="display:flex;align-items:center;gap:8px"><div class="wallet-bal">${fmt(bal)}</div><div class="wallet-acts"><button class="tx-act" onclick="openEditWalletModal('${w.id}')">✏️</button><button class="tx-act" onclick="deleteWallet('${w.id}')">🗑️</button></div></div></div>`;
+      return `<div class="wallet-row"><div class="wallet-left"><div class="wallet-dot" style="background:var(--purple)"></div><div><div class="wallet-name">${escapeHTML(w.name)}</div><div class="wallet-type">${escapeHTML(w.type)}</div></div></div><div style="display:flex;align-items:center;gap:8px"><div class="wallet-bal">${fmt(bal)}</div><div class="wallet-acts"><button class="tx-act" onclick="event.stopPropagation();openEditWalletModal('${w.id}')">✏️</button><button class="tx-act" onclick="event.stopPropagation();deleteWallet('${w.id}')">🗑️</button></div></div></div>`;
     }).join('');
-    return `<div class="member-card"><div class="member-header"><div class="member-info"><div class="member-avatar">${m.name[0].toUpperCase()}</div><div><div class="member-name">${escapeHTML(m.name)}</div><div class="member-total">Total: ${fmt(total)}</div></div></div><button class="modal-btn confirm" style="flex:none;padding:8px 14px;font-size:0.8rem" onclick="openWalletModal('${m.id}')">+ Wallet</button></div>${mWallets.length ? `<div class="member-wallets">${walletsHtml}</div>` : ''}</div>`;
+    return `<div class="member-card${isExpanded ? ' expanded' : ''}" data-member-id="${m.id}">
+      <div class="member-header" onclick="toggleMemberCard('${m.id}')">
+        <div class="member-info">
+          <div class="member-avatar">${m.name[0].toUpperCase()}</div>
+          <div>
+            <div class="member-name">${escapeHTML(m.name)}</div>
+            <div class="member-total">Total: ${fmt(total)} · ${mWallets.length} wallet${mWallets.length > 1 ? 's' : ''}</div>
+          </div>
+        </div>
+        <div class="member-header-actions">
+          <button class="modal-btn confirm" style="flex:none;padding:8px 14px;font-size:0.8rem" onclick="event.stopPropagation();openWalletModal('${m.id}')">+ Wallet</button>
+          <span class="member-chevron mi">expand_more</span>
+        </div>
+      </div>
+      <div class="member-wallets-wrap">
+        <div class="member-wallets">${walletsHtml}</div>
+      </div>
+    </div>`;
   }).join('') + '<div style="height:4px"></div>';
-
-
 }
 
 
