@@ -714,12 +714,13 @@ function txHTML(t, showActs = true) {
     walletName = escapeHTML(t.deletedWalletName) + ' (deleted)';
     walletDeleted = true;
   }
-  // Show member/note name first, then category after it (e.g. "Tirtho · Transport").
+  // Meta line shows "memberName · walletName" (each piece optional).
+  // Note is rendered on its own single-line truncated row below.
   const metaParts = [];
   if (memberName) metaParts.push(memberName);
-  else if (safeNote) metaParts.push(safeNote);
-  metaParts.push(safeCat);
+  if (walletName && walletName !== '—') metaParts.push(walletName);
   const metaLine = metaParts.join(' · ');
+  const noteLine = safeNote ? `<div class="tx-note" title="${safeNote}">${safeNote}</div>` : '';
   const acts = showActs ? `
     <button class="tx-detail-btn" onclick="openEdit('${t.id}'); event.stopPropagation();"><span class="mi sm">edit</span> Edit</button>
     <button class="tx-detail-btn danger" onclick="deleteTx('${t.id}'); event.stopPropagation();"><span class="mi sm">delete</span> Delete</button>` : '';
@@ -729,7 +730,8 @@ function txHTML(t, showActs = true) {
       <div class="tx-icon ${t.type === 'income' ? 'inc' : 'exp'}">${icon}</div>
       <div class="tx-info">
         <div class="tx-name">${safeCat}</div>
-        <div class="tx-meta">${metaLine}</div>
+        ${metaLine ? `<div class="tx-meta">${metaLine}</div>` : ''}
+        ${noteLine}
       </div>
       <div class="tx-right">
         <div class="tx-amount ${t.type === 'income' ? 'inc' : 'exp'}">${sign}${fmt(t.amount)}</div>

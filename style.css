@@ -4799,6 +4799,18 @@ button:focus-visible,
   text-overflow: ellipsis;
 }
 
+.tx-item.compact .tx-note {
+  font-size: 0.74rem;
+  color: var(--text2);
+  font-style: italic;
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+  opacity: 0.85;
+}
+
 .tx-item.compact .tx-right {
   display: flex;
   flex-direction: column;
