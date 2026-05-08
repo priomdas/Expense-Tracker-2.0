@@ -168,8 +168,8 @@ body {
 /* ── BOTTOM NAV ── */
 #bottomNav {
   height: 76px;
-  margin: 0 16px 12px;
-  margin-bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+  margin: 0 16px 4px;
+  margin-bottom: calc(4px + env(safe-area-inset-bottom, 0px));
   background: linear-gradient(145deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.02));
   border: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: 38px;
