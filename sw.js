@@ -26,7 +26,7 @@ messaging.onBackgroundMessage((payload) => {
   self.registration.showNotification(notificationTitle, notificationOptions);
 });
 
-const CACHE_NAME = 'expense-tracker-v47';
+const CACHE_NAME = 'expense-tracker-v48';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',

@@ -1,5 +1,24 @@
 // ─── BUILD MARKER (use this to verify cache is fresh) ───
-console.log('%c[Ledger] Build v20 loaded (modal overlay full-screen fix)', 'background:#5e5ce6;color:#fff;padding:4px 10px;border-radius:4px;font-weight:bold');
+console.log('%c[Ledger] Build v29 loaded', 'background:#5e5ce6;color:#fff;padding:4px 10px;border-radius:4px;font-weight:bold');
+
+// ─── Disable pinch-zoom and double-tap-zoom on iOS Safari ───
+// (the viewport meta tag is ignored by iOS since iOS 10).
+document.addEventListener('gesturestart', e => e.preventDefault(), { passive: false });
+document.addEventListener('gesturechange', e => e.preventDefault(), { passive: false });
+document.addEventListener('gestureend', e => e.preventDefault(), { passive: false });
+document.addEventListener('touchmove', e => {
+  if (e.touches && e.touches.length > 1) e.preventDefault();
+}, { passive: false });
+let __lastTouchEnd = 0;
+document.addEventListener('touchend', e => {
+  const now = Date.now();
+  if (now - __lastTouchEnd <= 350) e.preventDefault();
+  __lastTouchEnd = now;
+}, { passive: false });
+// Block Ctrl/Cmd + wheel zoom on desktop browsers as well.
+document.addEventListener('wheel', e => {
+  if (e.ctrlKey) e.preventDefault();
+}, { passive: false });
 
 // XSS Mitigation Helper
 function escapeHTML(str) {

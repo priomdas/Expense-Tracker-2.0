@@ -7,6 +7,12 @@
   -webkit-tap-highlight-color: transparent
 }
 
+/* Disable pinch-zoom and double-tap-zoom on the whole app (mobile web view). */
+html, body {
+  touch-action: pan-x pan-y;
+  -ms-touch-action: pan-x pan-y;
+}
+
 :root {
   color-scheme: dark;
   --bg: #0a0a0a;
