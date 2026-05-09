@@ -5279,7 +5279,7 @@ button:focus-visible,
 .insight-track {
   display: flex;
   flex-wrap: nowrap;
-  align-items: center;
+  align-items: stretch;
   transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
   width: 100%;
 }
