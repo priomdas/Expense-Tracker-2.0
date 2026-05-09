@@ -150,6 +150,8 @@ let pageStack = [];
 let selectedCat = '';
 let themePickerOpen = false;
 let pieChart = null, barChart = null;
+let insightTimer = null;
+let currentInsightIndex = 0;
 const HERO_THEMES = {
   ocean: {
     name: 'Ocean Glow',
@@ -796,37 +798,100 @@ function renderHome() {
 
   const recent = currentMonthTxs.slice(0, 5);
   document.getElementById('recentTxList').innerHTML = recent.length
-    ? `<div style="background:var(--surface);border-radius:var(--radius-sm);border:1px solid var(--border);padding:0 16px">` + recent.map(t => txHTML(t, true)).join('') + `</div>`
+    ? `<div class="tx-card-list">` + recent.map(t => txHTML(t, true)).join('') + `</div>`
     : `<div class="empty"><div class="empty-icon">📋</div><div class="empty-text">No transactions this month yet.<br>Tap + to add one!</div></div>`;
 
-  // Insight
-  const insight = generateInsight(currentMonthTxs, inc, exp, bal);
+  // Insight Carousel
+  const insights = generateInsights(currentMonthTxs, inc, exp, bal);
   const ic = document.getElementById('insightCard');
-  if (insight) { ic.style.display = 'flex'; document.getElementById('insightText').innerHTML = insight; }
-  else { ic.style.display = 'none'; }
+  const track = document.getElementById('insightTrack');
+  
+  // Always display because the Ad banner is always present
+  ic.style.display = 'flex'; 
+  
+  // Remove old dynamic slides, but KEEP the ad container
+  Array.from(track.children).forEach(child => {
+    if (child.id !== 'adSlideContainer') {
+      child.remove();
+    }
+  });
+
+  // Append new dynamic insights
+  if (insights && insights.length > 0) { 
+    insights.forEach(i => {
+      const slide = document.createElement('div');
+      slide.className = 'insight-slide';
+      slide.innerHTML = `<div class="insight-icon">${i.icon}</div><div class="insight-text">${i.text}</div>`;
+      track.appendChild(slide);
+    });
+  }
+
+  const totalSlides = track.children.length;
+  const dotsContainer = document.getElementById('insightDots');
+  
+  if (totalSlides > 1) {
+    dotsContainer.innerHTML = Array.from({length: totalSlides}).map((_, idx) => `<div class="insight-dot ${idx === 0 ? 'active' : ''}"></div>`).join('');
+    dotsContainer.style.display = 'flex';
+    startInsightSlider(totalSlides);
+  } else {
+    dotsContainer.style.display = 'none';
+    clearInterval(insightTimer);
+    track.style.transform = `translateX(0%)`;
+  }
 }
 
-function generateInsight(currentMonthTxs, inc, exp, bal) {
-  if (!currentMonthTxs.length) return null;
+function startInsightSlider(count) {
+  clearInterval(insightTimer);
+  currentInsightIndex = 0;
+  const track = document.getElementById('insightTrack');
+  const dots = document.querySelectorAll('.insight-dot');
+  track.style.transform = `translateX(0%)`;
+  
+  insightTimer = setInterval(() => {
+    currentInsightIndex = (currentInsightIndex + 1) % count;
+    track.style.transform = `translateX(-${currentInsightIndex * 100}%)`;
+    dots.forEach((d, i) => d.classList.toggle('active', i === currentInsightIndex));
+  }, 4500);
+}
 
+function generateInsights(currentMonthTxs, inc, exp, bal) {
+  const insights = [];
+  
+  // 1. Budget Alerts
   const now = new Date();
-  const monthKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
   const spending = {};
   currentMonthTxs.filter(t => t.type === 'expense').forEach(t => { spending[t.category] = (spending[t.category] || 0) + t.amount; });
   for (const b of state.budgets) {
     const spent = spending[b.category] || 0;
-    if (spent >= b.limit) return `⚠️ You exceeded your <b>${b.category}</b> budget! (${fmt(b.limit)})`;
-    if (spent >= b.limit * 0.8) return `⚠️ Used over 80% of <b>${b.category}</b> budget!`;
+    if (spent >= b.limit) {
+      insights.push({ icon: '⚠️', text: `You exceeded your <b>${b.category}</b> budget! (${fmt(b.limit)})` });
+    } else if (spent >= b.limit * 0.8) {
+      insights.push({ icon: '⚠️', text: `Used over 80% of <b>${b.category}</b> budget!` });
+    }
   }
 
-  const savingsRate = inc > 0 ? Math.round(((inc - exp) / inc) * 100) : 0;
-  // Top expense category
-  const catMap = {}; currentMonthTxs.filter(t => t.type === 'expense' && t.type !== 'transfer').forEach(t => { catMap[t.category] = (catMap[t.category] || 0) + t.amount; });
-  const topCat = Object.entries(catMap).sort((a, b) => b[1] - a[1])[0];
-  if (savingsRate < 0) return `You're spending more than you earn. Consider reviewing your <b>${topCat ? topCat[0] : 'expenses'}</b> category.`;
-  if (savingsRate > 40) return `Great job! You're saving <b>${savingsRate}%</b> of your income. Keep it up! 🎉`;
-  if (topCat) return `Your biggest expense is <b>${topCat[0]}</b> at ${fmt(topCat[1])}. Your savings rate is <b>${savingsRate}%</b>.`;
-  return null;
+  // 2. Savings Rate & Top Expense
+  if (currentMonthTxs.length > 0) {
+    const savingsRate = inc > 0 ? Math.round(((inc - exp) / inc) * 100) : 0;
+    const catMap = {}; 
+    currentMonthTxs.filter(t => t.type === 'expense' && t.type !== 'transfer').forEach(t => { catMap[t.category] = (catMap[t.category] || 0) + t.amount; });
+    const topCat = Object.entries(catMap).sort((a, b) => b[1] - a[1])[0];
+    
+    if (savingsRate < 0) {
+      insights.push({ icon: '📉', text: `Spending more than you earn. Review your <b>${topCat ? topCat[0] : 'expenses'}</b>.` });
+    } else if (savingsRate > 40) {
+      insights.push({ icon: '🎉', text: `Great job! You're saving <b>${savingsRate}%</b> of your income.` });
+    } else if (topCat) {
+      insights.push({ icon: '💡', text: `Biggest expense: <b>${topCat[0]}</b> at ${fmt(topCat[1])}. Savings rate: <b>${savingsRate}%</b>.` });
+    }
+  }
+  
+  // Fallback if empty
+  if (insights.length === 0) {
+    insights.push({ icon: '💡', text: `Track your daily expenses to gain better financial insights.` });
+  }
+  
+  return insights;
 }
 
 function renderFullTx() {
@@ -857,7 +922,7 @@ function renderFullTx() {
   document.getElementById('filterCat').innerHTML = '<option value="">All Categories</option>' + allCats.map(c => `<option value="${c}">${c}</option>`).join('');
   document.getElementById('filterCat').value = catF;
   document.getElementById('fullTxList').innerHTML = txs.length
-    ? `<div style="background:var(--surface);border-radius:var(--radius-sm);border:1px solid var(--border);padding:0 16px;margin-bottom:16px">` + txs.map(t => txHTML(t, true)).join('') + `</div>`
+    ? `<div class="tx-card-list" style="padding:0 0 16px">` + txs.map(t => txHTML(t, true)).join('') + `</div>`
     : `<div class="empty"><div class="empty-icon">📋</div><div class="empty-text">No transactions found.</div></div>`;
 }
 

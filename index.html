@@ -28,7 +28,7 @@
   <script src="https://www.gstatic.com/firebasejs/10.9.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.9.0/firebase-messaging-compat.js"></script>
-  <link rel="stylesheet" href="style.css?v=29">
+  <link rel="stylesheet" href="style.css?v=31">
 </head>
 
 <body>
@@ -120,8 +120,22 @@
 
           <!-- Insight card -->
           <div class="insight-card" id="insightCard" style="display:none">
-            <div class="insight-icon">💡</div>
-            <div class="insight-text" id="insightText">Loading insights…</div>
+            <div class="insight-track" id="insightTrack">
+              <!-- Ad Slide container -->
+              <div class="insight-slide ad-slide" id="adSlideContainer" style="justify-content: center; padding: 0;">
+                <script type="text/javascript">
+                  atOptions = {
+                    'key' : 'e38733b074a257d073e74b69ee0b4140',
+                    'format' : 'iframe',
+                    'height' : 50,
+                    'width' : 320,
+                    'params' : {}
+                  };
+                </script>
+                <script type="text/javascript" src="https://www.highperformanceformat.com/e38733b074a257d073e74b69ee0b4140/invoke.js"></script>
+              </div>
+            </div>
+            <div class="insight-dots" id="insightDots"></div>
           </div>
 
           <!-- Quick actions -->

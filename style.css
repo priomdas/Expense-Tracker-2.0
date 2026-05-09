@@ -3976,24 +3976,83 @@ select.form-input {
   color: var(--qa-icon-color) !important;
 }
 
-/* Minimalist Transaction List */
+/* ── Premium Transaction Cards ── */
 .tx-item {
-  background: transparent !important;
-  border: none !important;
-  border-bottom: 1px solid var(--border) !important;
-  border-radius: 0 !important;
-  box-shadow: none !important;
-  padding: 14px 4px !important;
+  background:
+    linear-gradient(145deg, rgba(255,255,255,0.06), rgba(255,255,255,0.015) 50%, transparent) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 16px !important;
+  box-shadow:
+    0 2px 8px rgba(0,0,0,0.06),
+    inset 0 1px 0 rgba(255,255,255,0.08) !important;
+  padding: 14px 16px !important;
+  margin-bottom: 8px !important;
+  transition: transform 0.3s cubic-bezier(0.22,1,0.36,1),
+              box-shadow 0.3s ease,
+              border-color 0.3s ease,
+              background 0.3s ease !important;
+  backdrop-filter: blur(12px) saturate(130%);
+  -webkit-backdrop-filter: blur(12px) saturate(130%);
+  position: relative;
+  overflow: hidden;
 }
-
+.tx-item::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.12) 30%, rgba(255,255,255,0.12) 70%, transparent);
+  pointer-events: none;
+}
+.tx-item:hover {
+  transform: translateY(-2px) !important;
+  box-shadow:
+    0 8px 24px rgba(0,0,0,0.12),
+    inset 0 1px 0 rgba(255,255,255,0.12) !important;
+  border-color: var(--border2) !important;
+}
+.tx-item:active {
+  transform: translateY(0) scale(0.985) !important;
+}
 .tx-item:last-child {
-  border-bottom: none !important;
+  margin-bottom: 0 !important;
 }
 
 .tx-icon {
-  border-radius: 50% !important;
-  /* Circle */
-  border: 1px solid var(--border2) !important;
+  width: 46px !important;
+  height: 46px !important;
+  border-radius: 14px !important;
+  border: 1px solid rgba(255,255,255,0.12) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.2),
+    0 4px 12px -2px rgba(0,0,0,0.1) !important;
+  transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1),
+              box-shadow 0.3s ease !important;
+}
+.tx-icon .mi {
+  font-variation-settings: 'FILL' 0, 'wght' 500, 'GRAD' 0, 'opsz' 24;
+  transition: font-variation-settings 0.3s ease;
+}
+.tx-item:hover .tx-icon {
+  transform: scale(1.08);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.3),
+    0 6px 16px -2px rgba(0,0,0,0.15) !important;
+}
+.tx-item:hover .tx-icon .mi {
+  font-variation-settings: 'FILL' 1, 'wght' 500, 'GRAD' 0, 'opsz' 24;
+}
+.tx-icon.inc {
+  background: linear-gradient(145deg, rgba(48,209,88,0.22), rgba(48,209,88,0.08)) !important;
+  border-color: rgba(48,209,88,0.2) !important;
+  color: var(--green);
+}
+.tx-icon.exp {
+  background: linear-gradient(145deg, rgba(255,69,58,0.22), rgba(255,69,58,0.08)) !important;
+  border-color: rgba(255,69,58,0.2) !important;
+  color: var(--red);
 }
 
 /* Modernize Insight card */
@@ -4753,27 +4812,25 @@ button:focus-visible,
 }
 
 /* ──────────────────────────────────────────────
-   COMPACT TX ITEM + ANIMATED DROPDOWN (v13)
+   COMPACT TX ITEM + ANIMATED DROPDOWN (v14 — Premium Cards)
    ────────────────────────────────────────────── */
 .tx-item.compact {
   display: block !important;
-  padding: 14px 0 !important;
   cursor: pointer;
   user-select: none;
   -webkit-tap-highlight-color: transparent;
-  transition: background 0.2s ease;
-  border-radius: 0 !important;
   position: relative;
   z-index: 2;
 }
 .tx-item.compact:hover {
-  background: rgba(255, 255, 255, 0.025) !important;
+  background:
+    linear-gradient(145deg, rgba(255,255,255,0.09), rgba(255,255,255,0.02) 50%, transparent) !important;
 }
 
 .tx-item.compact .tx-row {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 14px;
   width: 100%;
 }
 
@@ -4788,67 +4845,87 @@ button:focus-visible,
 }
 
 .tx-item.compact .tx-name {
-  font-size: 0.95rem;
+  font-size: 0.92rem;
   font-weight: 700;
   margin-bottom: 3px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  letter-spacing: -0.01em;
 }
 
 .tx-item.compact .tx-meta {
-  font-size: 0.78rem;
+  font-size: 0.76rem;
   color: var(--text2);
-  font-weight: 500;
+  font-weight: 600;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
 
 .tx-item.compact .tx-note {
-  font-size: 0.74rem;
+  font-size: 0.72rem;
   color: var(--text2);
   font-style: italic;
-  margin-top: 2px;
+  margin-top: 3px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   max-width: 100%;
-  opacity: 0.85;
+  opacity: 0.7;
+  padding-left: 1px;
 }
 
 .tx-item.compact .tx-right {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
-  gap: 2px;
+  gap: 3px;
   flex-shrink: 0;
 }
 
 .tx-item.compact .tx-amount {
   font-size: 0.95rem;
   font-weight: 800;
-  letter-spacing: -0.01em;
+  letter-spacing: -0.02em;
   font-variant-numeric: tabular-nums;
+}
+.tx-item.compact .tx-amount.inc {
+  background: linear-gradient(135deg, #30d158, #34e060);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.tx-item.compact .tx-amount.exp {
+  color: var(--red);
 }
 
 .tx-item.compact .tx-date-small {
-  font-size: 0.7rem;
+  font-size: 0.68rem;
   color: var(--text2);
-  font-weight: 500;
-  opacity: 0.75;
+  font-weight: 600;
+  opacity: 0.6;
+  padding: 2px 6px;
+  background: rgba(255,255,255,0.04);
+  border-radius: 6px;
+  letter-spacing: 0.02em;
 }
 
 /* Chevron indicator */
 .tx-chevron {
   color: var(--text2);
-  font-size: 1.2rem !important;
+  font-size: 1.1rem !important;
   flex-shrink: 0;
   margin-left: 2px;
-  opacity: 0.5;
-  transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.25s ease, color 0.25s ease;
+  opacity: 0.35;
+  transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1),
+              opacity 0.25s ease,
+              color 0.25s ease;
 }
-.tx-item.compact:hover .tx-chevron { opacity: 0.85; }
+.tx-item.compact:hover .tx-chevron { opacity: 0.7; }
 .tx-item.compact.expanded .tx-chevron {
   transform: rotate(180deg);
   opacity: 1;
@@ -4872,12 +4949,22 @@ button:focus-visible,
 .tx-item.compact.expanded .tx-details-dropdown {
   grid-template-rows: 1fr;
   opacity: 1;
-  margin-top: 12px;
+  margin-top: 14px;
+}
+
+/* Expanded card gets a subtle glow */
+.tx-item.compact.expanded {
+  border-color: rgba(94,92,230,0.25) !important;
+  box-shadow:
+    0 4px 20px rgba(94,92,230,0.08),
+    inset 0 1px 0 rgba(255,255,255,0.1) !important;
 }
 
 /* Inner card */
 .tx-details-grid {
-  background: var(--surface2);
+  background:
+    linear-gradient(145deg, rgba(255,255,255,0.04), transparent),
+    var(--surface2);
   border: 1px solid var(--border);
   border-radius: 14px;
   padding: 6px 14px;
@@ -4888,7 +4975,7 @@ button:focus-visible,
   justify-content: space-between;
   align-items: center;
   gap: 12px;
-  padding: 9px 0;
+  padding: 10px 0;
   border-bottom: 1px solid var(--border);
   font-size: 0.85rem;
 }
@@ -4908,7 +4995,7 @@ button:focus-visible,
   font-weight: 600;
   text-align: right;
   word-break: break-word;
-  font-size: 0.88rem;
+  font-size: 0.86rem;
 }
 
 /* Edit / Delete buttons inside dropdown */
@@ -4924,7 +5011,9 @@ button:focus-visible,
   justify-content: center;
   gap: 6px;
   padding: 10px 14px;
-  background: var(--surface2);
+  background:
+    linear-gradient(145deg, rgba(255,255,255,0.06), transparent),
+    var(--surface2);
   border: 1px solid var(--border2);
   border-radius: 12px;
   font-family: 'Plus Jakarta Sans', sans-serif;
@@ -4932,20 +5021,27 @@ button:focus-visible,
   font-weight: 700;
   color: var(--text);
   cursor: pointer;
-  transition: transform 0.2s ease, background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+  transition: transform 0.25s cubic-bezier(0.34,1.56,0.64,1),
+              background 0.2s ease,
+              border-color 0.2s ease,
+              color 0.2s ease,
+              box-shadow 0.2s ease;
 }
 .tx-detail-btn .mi { font-size: 1rem !important; }
 .tx-detail-btn:hover {
   background: var(--surface3);
   border-color: var(--purple);
   color: var(--purple);
+  box-shadow: 0 4px 12px rgba(94,92,230,0.12);
+  transform: translateY(-1px);
 }
-.tx-detail-btn:active { transform: scale(0.97); }
+.tx-detail-btn:active { transform: translateY(0) scale(0.97); }
 .tx-detail-btn.danger { color: var(--red); }
 .tx-detail-btn.danger:hover {
-  background: rgba(255, 69, 58, 0.1);
+  background: rgba(255, 69, 58, 0.08);
   border-color: var(--red);
   color: var(--red);
+  box-shadow: 0 4px 12px rgba(255,69,58,0.12);
 }
 
 /* Hide legacy badges/actions inside compact items (now in dropdown) */
@@ -5126,19 +5222,37 @@ button:focus-visible,
 }
 .section-link:active { transform: scale(0.96); }
 
-/* ── Recent transactions container subtle polish ── */
-#recentTxList > div:not(.empty) {
-  border-radius: 18px !important;
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.02), transparent),
-    var(--surface) !important;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+/* ── Recent transactions container — card-gap layout ── */
+#recentTxList > .tx-card-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
 /* ── Hero amount glow on positive balance ── */
 .hero-amount {
   text-shadow: 0 2px 24px rgba(255, 255, 255, 0.08);
 }
+
+/* ── Entrance stagger animation for tx cards ── */
+@keyframes txCardIn {
+  0% {
+    opacity: 0;
+    transform: translateY(12px) scale(0.97);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+.tx-card-list .tx-item.compact {
+  animation: txCardIn 0.45s cubic-bezier(0.22,1,0.36,1) both;
+}
+.tx-card-list .tx-item.compact:nth-child(1) { animation-delay: 0.04s; }
+.tx-card-list .tx-item.compact:nth-child(2) { animation-delay: 0.1s; }
+.tx-card-list .tx-item.compact:nth-child(3) { animation-delay: 0.16s; }
+.tx-card-list .tx-item.compact:nth-child(4) { animation-delay: 0.22s; }
+.tx-card-list .tx-item.compact:nth-child(5) { animation-delay: 0.28s; }
 
 
 
@@ -5152,5 +5266,44 @@ button:focus-visible,
     transition-duration: 0.001ms !important;
     scroll-behavior: auto !important;
   }
-  .confetti-container { display: none !important; }
 }
+
+/* ── Insight Slider Carousel ── */
+.insight-card {
+  padding: 0 !important; /* Reset padding to allow full bleed sliding */
+  display: flex !important;
+  flex-direction: column;
+}
+.insight-track {
+  display: flex;
+  transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+  width: 100%;
+}
+.insight-slide {
+  flex: 0 0 100%;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 20px;
+  box-sizing: border-box;
+}
+.insight-dots {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  padding-bottom: 12px;
+}
+.insight-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--text2);
+  opacity: 0.3;
+  transition: opacity 0.3s, transform 0.3s;
+}
+.insight-dot.active {
+  opacity: 1;
+  background: var(--purple);
+  transform: scale(1.2);
+}
+
