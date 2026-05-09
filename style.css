@@ -5273,23 +5273,35 @@ button:focus-visible,
   padding: 0 !important; /* Reset padding to allow full bleed sliding */
   display: flex !important;
   flex-direction: column;
+  overflow: hidden !important;
+  min-height: 85px; /* Prevent collapse if ad is blocked */
 }
 .insight-track {
   display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
   transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
   width: 100%;
 }
 .insight-slide {
   flex: 0 0 100%;
+  width: 100%;
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 14px;
   padding: 16px 20px;
   box-sizing: border-box;
 }
+.insight-slide.ad-slide {
+  padding: 10px 0;
+  min-height: 70px;
+}
 .insight-dots {
   display: flex;
   justify-content: center;
+  align-items: center;
+  width: 100%;
   gap: 6px;
   padding-bottom: 12px;
 }
