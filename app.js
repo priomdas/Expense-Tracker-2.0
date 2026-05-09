@@ -809,9 +809,9 @@ function renderHome() {
   // Always display because the Ad banner is always present
   ic.style.display = 'flex'; 
   
-  // Remove old dynamic slides, but KEEP the ad container
+  // Remove old dynamic slides, but KEEP any ad containers
   Array.from(track.children).forEach(child => {
-    if (child.id !== 'adSlideContainer') {
+    if (!child.classList.contains('ad-slide')) {
       child.remove();
     }
   });
