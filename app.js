@@ -806,24 +806,18 @@ function renderHome() {
   const ic = document.getElementById('insightCard');
   const track = document.getElementById('insightTrack');
   
-  // Always display because the Ad banner is always present
-  ic.style.display = 'flex'; 
-  
-  // Remove old dynamic slides, but KEEP any ad containers
-  Array.from(track.children).forEach(child => {
-    if (!child.classList.contains('ad-slide')) {
-      child.remove();
-    }
-  });
+  track.innerHTML = ''; // Clear everything
 
-  // Append new dynamic insights
   if (insights && insights.length > 0) { 
+    ic.style.display = 'flex';
     insights.forEach(i => {
       const slide = document.createElement('div');
       slide.className = 'insight-slide';
       slide.innerHTML = `<div class="insight-icon">${i.icon}</div><div class="insight-text">${i.text}</div>`;
       track.appendChild(slide);
     });
+  } else {
+    ic.style.display = 'none';
   }
 
   const totalSlides = track.children.length;

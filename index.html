@@ -28,7 +28,7 @@
   <script src="https://www.gstatic.com/firebasejs/10.9.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.9.0/firebase-messaging-compat.js"></script>
-  <link rel="stylesheet" href="style.css?v=35">
+  <link rel="stylesheet" href="style.css?v=44">
 </head>
 
 <body>
@@ -118,56 +118,10 @@
             </div>
           </div>
 
+          <div class="home-sheet">
           <!-- Insight card -->
           <div class="insight-card" id="insightCard" style="display:none">
             <div class="insight-track" id="insightTrack">
-              <!-- Ad Slide 1 container (320x50) -->
-              <div class="insight-slide ad-slide" style="justify-content: center; max-width: 100%; overflow: hidden;">
-                <div style="transform: scale(0.95); transform-origin: center center; display: flex; justify-content: center;">
-                  <script type="text/javascript">
-                    atOptions = {
-                      'key' : 'e38733b074a257d073e74b69ee0b4140',
-                      'format' : 'iframe',
-                      'height' : 50,
-                      'width' : 320,
-                      'params' : {}
-                    };
-                  </script>
-                  <script type="text/javascript" src="https://www.highperformanceformat.com/e38733b074a257d073e74b69ee0b4140/invoke.js"></script>
-                </div>
-              </div>
-
-              <!-- Ad Slide 2 container (468x60) -->
-              <div class="insight-slide ad-slide" style="justify-content: center; max-width: 100%; overflow: hidden;">
-                <div style="transform: scale(0.65); transform-origin: center center; display: flex; justify-content: center; margin: -10px 0;">
-                  <script type="text/javascript">
-                    atOptions = {
-                      'key' : '6dbc983d24889606437e3286bbcccde8',
-                      'format' : 'iframe',
-                      'height' : 60,
-                      'width' : 468,
-                      'params' : {}
-                    };
-                  </script>
-                  <script type="text/javascript" src="https://www.highperformanceformat.com/6dbc983d24889606437e3286bbcccde8/invoke.js"></script>
-                </div>
-              </div>
-
-              <!-- Ad Slide 3 container (728x90) -->
-              <div class="insight-slide ad-slide" style="justify-content: center; max-width: 100%; overflow: hidden;">
-                <div style="transform: scale(0.48); transform-origin: center center; display: flex; justify-content: center; margin: -23px 0;">
-                  <script type="text/javascript">
-                    atOptions = {
-                      'key' : 'c95d5dc9a63708998637e4a342b3cb1d',
-                      'format' : 'iframe',
-                      'height' : 90,
-                      'width' : 728,
-                      'params' : {}
-                    };
-                  </script>
-                  <script type="text/javascript" src="https://www.highperformanceformat.com/c95d5dc9a63708998637e4a342b3cb1d/invoke.js"></script>
-                </div>
-              </div>
             </div>
             <div class="insight-dots" id="insightDots"></div>
           </div>
@@ -212,6 +166,7 @@
               <div class="empty-text">No transactions yet.<br>Tap + to add one!</div>
             </div>
           </div>
+          </div><!-- /.home-sheet -->
         </div>
       </div>
 
@@ -509,6 +464,7 @@
               onchange="handleProfilePhotoPick(event)">
           </div>
 
+          <div class="settings-section-title"><span>Preferences</span></div>
           <div class="settings-panel">
             <div class="settings-row" onclick="document.getElementById('settingsNotifToggle').click()" style="cursor:pointer">
               <div class="settings-left">
@@ -595,16 +551,20 @@
                 <option value="MYR">RM MYR</option>
               </select>
             </div>
+          </div>
+
+          <div class="settings-section-title"><span>Money & Data</span></div>
+          <div class="settings-panel">
             <div class="settings-row" onclick="navigate('p-family')" style="cursor:pointer">
               <div class="settings-left">
-                <div class="settings-icon" style="background:rgba(255,255,255,0.08); color:var(--text)"><span
+                <div class="settings-icon" style="background:rgba(124,122,255,0.15); color:#7c7aff"><span
                     class="mi">group</span></div>
                 <div>
-                  <div class="settings-label">Family & Members</div>
+                  <div class="settings-label">Family &amp; Members</div>
                   <div class="settings-sub">Manage accounts</div>
                 </div>
               </div>
-              <div style="color:var(--text-muted);font-size:1.4rem"><span class="mi">chevron_right</span></div>
+              <span class="settings-chevron mi">chevron_right</span>
             </div>
             <div class="settings-row" onclick="navigate('p-goals')" style="cursor:pointer">
               <div class="settings-left">
@@ -615,7 +575,7 @@
                   <div class="settings-sub">Track targets</div>
                 </div>
               </div>
-              <div style="color:var(--text-muted);font-size:1.4rem"><span class="mi">chevron_right</span></div>
+              <span class="settings-chevron mi">chevron_right</span>
             </div>
             <div class="settings-row" onclick="navigate('p-recurring')" style="cursor:pointer">
               <div class="settings-left">
@@ -623,10 +583,10 @@
                     class="mi">autorenew</span></div>
                 <div>
                   <div class="settings-label">Recurring</div>
-                  <div class="settings-sub">Bills & subscriptions</div>
+                  <div class="settings-sub">Bills &amp; subscriptions</div>
                 </div>
               </div>
-              <div style="color:var(--text-muted);font-size:1.4rem"><span class="mi">chevron_right</span></div>
+              <span class="settings-chevron mi">chevron_right</span>
             </div>
             <div class="settings-row" onclick="navigate('p-notes')" style="cursor:pointer">
               <div class="settings-left">
@@ -637,30 +597,32 @@
                   <div class="settings-sub">Small side notes</div>
                 </div>
               </div>
-              <div style="color:var(--text-muted);font-size:1.4rem"><span class="mi">chevron_right</span></div>
+              <span class="settings-chevron mi">chevron_right</span>
             </div>
             <div class="settings-row" onclick="exportCSV()" style="cursor:pointer">
               <div class="settings-left">
-                <div class="settings-icon" style="background:#e0f7fa; color:#0097a7"><span class="mi">download</span>
-                </div>
+                <div class="settings-icon" style="background:rgba(0,151,167,0.15); color:#0097a7"><span class="mi">download</span></div>
                 <div>
                   <div class="settings-label">Export Data</div>
                   <div class="settings-sub">Download CSV</div>
                 </div>
               </div>
-              <div style="color:var(--text2);font-size:1rem">→</div>
+              <span class="settings-chevron mi">chevron_right</span>
             </div>
           </div>
 
-          <div class="settings-panel" style="margin-bottom:0">
+          <div class="settings-section-title"><span>Account</span></div>
+          <div class="settings-panel danger-panel" style="margin-bottom:0">
             <div class="settings-row" onclick="logout()" style="cursor:pointer">
               <div class="settings-left">
                 <div class="settings-icon" style="background:var(--red-light); color:var(--red)"><span
                     class="mi">logout</span></div>
                 <div>
                   <div class="settings-label" style="color:var(--red)">Log Out</div>
+                  <div class="settings-sub">Sign out of this device</div>
                 </div>
               </div>
+              <span class="settings-chevron mi">chevron_right</span>
             </div>
           </div>
 
@@ -1209,35 +1171,55 @@
     <div style="font-size:0.9rem; font-weight:600; color:var(--text2); margin-top:16px;">Verifying securely...</div>
   </div>
 
-  <!-- AUTH — Premium Glassmorphic Login -->
+  <!-- AUTH — Modern Fintech Login -->
   <div id="auth" style="display:none">
-    <!-- Animated mesh gradient background -->
+    <!-- Animated aurora mesh background -->
     <div class="auth-bg">
+      <div class="auth-grid"></div>
+      <div class="auth-noise"></div>
       <div class="auth-orb auth-orb-1"></div>
       <div class="auth-orb auth-orb-2"></div>
       <div class="auth-orb auth-orb-3"></div>
       <div class="auth-orb auth-orb-4"></div>
+      <div class="auth-currency-rain" aria-hidden="true">
+        <span>$</span><span>€</span><span>৳</span><span>£</span><span>¥</span><span>₹</span>
+      </div>
     </div>
 
-    <!-- Glassmorphic login card -->
+    <!-- Modern glass login card -->
     <div class="auth-card">
-      <!-- Logo -->
-      <div class="auth-logo">
-        <img src="logo.png?v=2" alt="Ledger Logo">
+      <span class="auth-card-glow" aria-hidden="true"></span>
+
+      <!-- Brand hero -->
+      <div class="auth-brand">
+        <div class="auth-logo">
+          <img src="logo.png?v=2" alt="Ledger Logo">
+          <span class="auth-logo-ring"></span>
+        </div>
+        <div class="auth-badge">
+          <span class="auth-badge-dot"></span>
+          <span>Smart money, simplified</span>
+        </div>
       </div>
-      <div class="auth-title">Ledger</div>
+
+      <div class="auth-title">
+        <span class="auth-title-line">Welcome to</span>
+        <span class="auth-title-grad">Ledger</span>
+      </div>
       <div class="auth-sub" id="authSub">Sign in to your account</div>
 
       <div class="auth-form">
         <!-- Floating label: Email -->
-        <div class="float-group">
+        <div class="float-group has-icon">
+          <span class="float-icon mi sm">mail</span>
           <input class="float-input" id="emailInput" type="email" placeholder=" " autocomplete="off" required>
           <label class="float-label" for="emailInput">Email</label>
           <div class="float-bar"></div>
         </div>
 
         <!-- Floating label: Password -->
-        <div class="float-group">
+        <div class="float-group has-icon">
+          <span class="float-icon mi sm">lock</span>
           <input class="float-input" id="passwordInput" type="password" placeholder=" " required
             style="padding-right:46px;">
           <label class="float-label" for="passwordInput">Password</label>
@@ -1249,14 +1231,16 @@
         </div>
 
         <!-- Registration: Name (hidden) -->
-        <div class="float-group" id="nameGroup" style="display:none">
+        <div class="float-group has-icon" id="nameGroup" style="display:none">
+          <span class="float-icon mi sm">person</span>
           <input class="float-input" id="nameInput" type="text" placeholder=" " maxlength="30">
           <label class="float-label" for="nameInput">Your Name</label>
           <div class="float-bar"></div>
         </div>
 
         <!-- Registration: Currency (hidden) -->
-        <div class="float-group" id="currencyGroup" style="display:none">
+        <div class="float-group has-icon" id="currencyGroup" style="display:none">
+          <span class="float-icon mi sm">payments</span>
           <select class="float-input float-select" id="obCurrency">
             <option value="BDT">৳ BDT — Bangladeshi Taka</option>
             <option value="USD">$ USD — US Dollar</option>
@@ -1275,17 +1259,18 @@
           <div class="float-bar"></div>
         </div>
 
-        <!-- Auth button with loading spinner -->
+        <!-- Auth button with shimmer + loading spinner -->
         <button class="auth-btn" id="authBtn" onclick="handleAuth()">
           <span class="auth-btn-text">Sign In</span>
+          <span class="auth-btn-arrow mi sm">arrow_forward</span>
           <span class="auth-btn-spinner"></span>
         </button>
 
-        <div class="auth-divider"><span>or</span></div>
+        <div class="auth-divider"><span>or continue with</span></div>
 
         <button class="auth-google" onclick="handleGoogleAuth()">
           <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="18" height="18" alt="">
-          Continue with Google
+          <span>Continue with Google</span>
         </button>
 
         <button id="forgotPwdBtn" class="auth-forgot-link" type="button" onclick="handleForgotPassword()">Forgot your
@@ -1294,6 +1279,13 @@
         <div class="auth-toggle" onclick="toggleAuth()"><span id="authToggle">New here? <b>Create account</b></span>
         </div>
       </div>
+    </div>
+
+    <!-- Trust chips -->
+    <div class="auth-trust">
+      <div class="auth-chip"><span class="mi sm">lock</span> Bank-grade encryption</div>
+      <div class="auth-chip"><span class="mi sm">bolt</span> Real-time sync</div>
+      <div class="auth-chip"><span class="mi sm">insights</span> AI insights</div>
     </div>
   </div>
 
