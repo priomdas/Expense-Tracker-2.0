@@ -5736,6 +5736,22 @@ button:focus-visible,
   -webkit-backdrop-filter: blur(14px) saturate(140%);
 }
 
+/* Unify moon halo: hide sky-haze, expand celestial glow to one smooth layer */
+#p-home .hero-sky-haze {
+  display: none;
+}
+
+#p-home .hero-celestial::before {
+  inset: -60px;
+  background: radial-gradient(circle,
+      rgba(255, 255, 255, 0.30),
+      rgba(255, 255, 255, 0.12) 32%,
+      rgba(255, 255, 255, 0.04) 60%,
+      transparent 80%);
+  opacity: 1;
+  filter: blur(2px);
+}
+
 .home-sheet {
   background: var(--bg);
   border-radius: 28px 28px 0 0;

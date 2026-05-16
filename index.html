@@ -16,6 +16,20 @@
   <link rel="manifest" href="manifest.json?v=2">
   <link rel="icon" type="image/png" href="logo.png">
   <link rel="apple-touch-icon" href="logo.png">
+  <script>
+    // ── DEVICE DETECTION: redirect desktop users to desktop.html ──
+    (function () {
+      try {
+        var qs = new URLSearchParams(window.location.search);
+        var force = qs.get('force');
+        if (force === 'mobile') return;
+        var isDesktop = window.matchMedia('(min-width: 1024px) and (pointer: fine)').matches;
+        if (isDesktop || force === 'desktop') {
+          window.location.replace('desktop.html' + window.location.search);
+        }
+      } catch (e) { /* ignore, fallback to mobile */ }
+    })();
+  </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
@@ -28,7 +42,7 @@
   <script src="https://www.gstatic.com/firebasejs/10.9.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.9.0/firebase-messaging-compat.js"></script>
-  <link rel="stylesheet" href="style.css?v=45">
+  <link rel="stylesheet" href="style.css?v=47">
 </head>
 
 <body>
@@ -195,6 +209,10 @@
           <select class="form-input" id="filterCat" onchange="renderFullTx()"
             style="flex:1;padding:10px 12px;min-width:120px">
             <option value="">All Categories</option>
+          </select>
+          <select class="form-input" id="filterMember" onchange="renderFullTx()"
+            style="flex:1;padding:10px 12px;min-width:120px">
+            <option value="">All Members</option>
           </select>
         </div>
         <div class="scroll-area" id="fullTxList"></div>

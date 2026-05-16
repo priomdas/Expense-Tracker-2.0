@@ -893,6 +893,7 @@ function renderFullTx() {
   const catF = document.getElementById('filterCat').value;
   const searchF = document.getElementById('filterSearch').value.toLowerCase();
   const dateF = document.getElementById('filterDate').value;
+  const memberF = document.getElementById('filterMember')?.value || '';
 
   const now = new Date();
   const thisMonthHash = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
@@ -903,6 +904,7 @@ function renderFullTx() {
     if (t.type === 'transfer') return false;
     if (typeF && t.type !== typeF) return false;
     if (catF && t.category !== catF) return false;
+    if (memberF && t.memberId !== memberF) return false;
     if (searchF) {
       const matchName = (t.category || '').toLowerCase().includes(searchF);
       const matchNote = (t.note || '').toLowerCase().includes(searchF);
@@ -915,6 +917,13 @@ function renderFullTx() {
   const allCats = [...CATS.income, ...CATS.expense];
   document.getElementById('filterCat').innerHTML = '<option value="">All Categories</option>' + allCats.map(c => `<option value="${c}">${c}</option>`).join('');
   document.getElementById('filterCat').value = catF;
+  // Populate member filter dropdown
+  const memberSel = document.getElementById('filterMember');
+  if (memberSel) {
+    memberSel.innerHTML = '<option value="">All Members</option>' +
+      state.members.map(m => `<option value="${m.id}">${escapeHTML(m.name)}</option>`).join('');
+    memberSel.value = memberF;
+  }
   document.getElementById('fullTxList').innerHTML = txs.length
     ? `<div class="tx-card-list" style="padding:0 0 16px">` + txs.map(t => txHTML(t, true)).join('') + `</div>`
     : `<div class="empty"><div class="empty-icon">📋</div><div class="empty-text">No transactions found.</div></div>`;
