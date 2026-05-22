@@ -250,6 +250,16 @@ function dNav(view) {
 }
 
 // ── Stats compute ──
+// No-wallet balance: income/expense/transfers on transactions without a walletId
+function dNoWalletBalance() {
+  const txs = dState.transactions;
+  const inc = txs.filter(t => t.type === 'income' && !t.walletId).reduce((s, t) => s + (t.amount || 0), 0);
+  const exp = txs.filter(t => t.type === 'expense' && !t.walletId).reduce((s, t) => s + (t.amount || 0), 0);
+  const transOut = txs.filter(t => t.type === 'transfer' && !t.walletId).reduce((s, t) => s + (t.amount || 0), 0);
+  const transIn = txs.filter(t => t.type === 'transfer' && !t.toWalletId).reduce((s, t) => s + (t.amount || 0), 0);
+  return inc - exp - transOut + transIn;
+}
+
 function dStats() {
   const now = new Date();
   const m = now.getMonth(), y = now.getFullYear();
@@ -259,10 +269,13 @@ function dStats() {
   });
   const inc = monthTxs.filter(t => t.type === 'income').reduce((s, t) => s + (t.amount || 0), 0);
   const exp = monthTxs.filter(t => t.type === 'expense').reduce((s, t) => s + (t.amount || 0), 0);
+
+  // Calculate total balance matching mobile: sum of all wallet live balances + no-wallet balance
+  const totalAllWallets = (dState.wallets || []).reduce((sum, w) => sum + dWalletBalance(w.id), 0);
+  const balance = totalAllWallets + dNoWalletBalance();
+
   const totalInc = dState.transactions.filter(t => t.type === 'income').reduce((s, t) => s + (t.amount || 0), 0);
   const totalExp = dState.transactions.filter(t => t.type === 'expense').reduce((s, t) => s + (t.amount || 0), 0);
-  const initial = (dState.wallets || []).reduce((s, w) => s + (w.initialBalance || 0), 0);
-  const balance = initial + totalInc - totalExp;
   return { monthTxs, inc, exp, balance, totalInc, totalExp };
 }
 
@@ -425,20 +438,24 @@ function dRenderSparkChart() {
     days.push(d);
   }
   let running = (dState.wallets || []).reduce((s, w) => s + (w.initialBalance || 0), 0);
-  // running balance at start of window
+  // running balance at start of window (transfers between wallets are zero-sum for total balance)
   const startStr = days[0].toISOString().slice(0, 10);
   dState.transactions.forEach(t => {
     if (t.date < startStr) {
       if (t.type === 'income') running += (t.amount || 0);
       else if (t.type === 'expense') running -= (t.amount || 0);
+      // transfers don't change total balance (zero-sum between wallets)
     }
   });
+  // Also add no-wallet balance from transactions before the window that have no walletId
+  // (these are already included in the running calc above since we count ALL income/expense)
   const data = days.map(d => {
     const ds = d.toISOString().slice(0, 10);
     const dayTxs = dState.transactions.filter(t => t.date === ds);
     dayTxs.forEach(t => {
       if (t.type === 'income') running += (t.amount || 0);
       else if (t.type === 'expense') running -= (t.amount || 0);
+      // transfers don't change total balance
     });
     return running;
   });
